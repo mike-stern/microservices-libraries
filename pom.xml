@@ -63,13 +63,18 @@
 			<name>CIDA Public Nexus</name>
 			<url>http://cida.usgs.gov/maven/cida-public/</url>
 		</repository>
+		<repository>
+			<id>cida-third-party</id>
+			<name>CIDA Third Party</name>
+			<url>http://internal.cida.usgs.gov/maven/content/repositories/cida-thirdparty/</url>
+		</repository>
 	</repositories>
 		
 	<dependencies>
 		<dependency>
-			<groupId>gov.usgs.cida</groupId>
-			<artifactId>consul-api</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<groupId>com.orbitz.consul</groupId>
+			<artifactId>consul-client</artifactId>
+			<version>0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -103,14 +108,56 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-	 <dependency>
-	  <groupId>org.apache.commons</groupId>
-	  <artifactId>commons-lang3</artifactId>
-	  <version>3.3.2</version>
-	  <type>jar</type>
-	 </dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
+		</dependency>
 	</dependencies>
-
+	
+	<profiles>
+		<profile>
+			<id>development</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.18.1</version>
+						<configuration>
+							<excludes>
+								<exclude>**/*IT.java</exclude>
+							</excludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>microservice-integration-test</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.18.1</version>
+						<configuration>
+							<includes>
+								<include>**/*IT.java</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	
 	<build>
 		<plugins>
 			<plugin>
