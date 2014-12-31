@@ -1,6 +1,7 @@
 package gov.usgs.cida.microservices.api.discovery;
 
 import gov.usgs.cida.microservices.config.ServiceConfig;
+import java.util.List;
 import java.util.Map;
 
 public interface Client {
@@ -20,5 +21,13 @@ public interface Client {
 	 * Retrieves a list of known services 
 	 * @return 
 	 */
-	public Map<String, ServiceConfig> getServices();
+	public Map<String, List<String>> getServices();
+	
+	/**
+	 * Get a service by name
+	 * 
+	 * @param serviceName
+	 * @return 
+	 */
+	public List<ServiceConfig> getService(String serviceName);
 }

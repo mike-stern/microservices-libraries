@@ -1,11 +1,13 @@
 package gov.usgs.cida.microservices.catalog;
 
+import com.orbitz.consul.CatalogClient;
 import com.orbitz.consul.Consul;
-import com.orbitz.consul.model.health.Service;
+import com.orbitz.consul.model.catalog.CatalogService;
 import gov.usgs.cida.microservices.api.discovery.Client;
 import gov.usgs.cida.microservices.config.ServiceConfig;
 import gov.usgs.cida.microservices.config.ServiceConfigBuilder;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
@@ -85,20 +87,31 @@ public class ConsulClient implements Client {
 	}
 
 	@Override
-	public Map<String, ServiceConfig> getServices() {
-		Map<String, ServiceConfig> result = new HashMap<>();
-		Map<String, Service> services = this.client.agentClient().getServices();
-		for (String key : services.keySet()) {
-			ServiceConfigBuilder confBuilder = new ServiceConfigBuilder();
-			Service svc = services.get(key);
+	public Map<String, List<String>> getServices() {
+		CatalogClient cClient = this.client.catalogClient();
+		return cClient.getServices().getResponse();
+	}
+
+	@Override
+	public List<ServiceConfig> getService(String serviceName) {
+		CatalogClient cClient = this.client.catalogClient();
+		List<ServiceConfig> result = new ArrayList<>();
+		List<CatalogService> serviceList = cClient.getService(serviceName).getResponse();
+		for (CatalogService service : serviceList) {
+			ServiceConfigBuilder builder = new ServiceConfigBuilder();
 			
-			confBuilder.setId(svc.getId());
-			confBuilder.setName(svc.getService());
-			confBuilder.setPort(svc.getPort());
-			confBuilder.setTags(svc.getTags());
+			builder.setAddress(service.getAddress());
+			builder.setNode(service.getNode());
+			builder.setId(service.getServiceId());
+			builder.setName(service.getServiceName());
+			builder.setPort(service.getServicePort());
+			builder.setTags(service.getServiceTags().toArray(new String[0]));
 			
-			result.put(key, confBuilder.build());
+			result.add(builder.build());
 		}
+		
 		return result;
 	}
+	
+	
 }

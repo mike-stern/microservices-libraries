@@ -13,8 +13,11 @@ import org.slf4j.LoggerFactory;
 public class ServiceConfig {
 
 	private static final Logger logger = LoggerFactory.getLogger(ServiceConfig.class);
+	
 	private String name; //required
 	private int port; //required
+	private String address; // Auto-filled 
+	private String node; // Auto-filled
 	private String id; //optional
 	private long ttl; // optional
 	private String[] tags; //optional
@@ -61,6 +64,35 @@ public class ServiceConfig {
 	protected void setPort(int port) {
 		this.port = port;
 	}
+	
+	
+	/**
+	 * @return the address
+	 */
+	public String getAddress() {
+		return address;
+	}
+
+	/**
+	 * @param address the address to set
+	 */
+	protected void setAddress(String address) {
+		this.address = address;
+	}
+
+	/**
+	 * @return the node
+	 */
+	public String getNode() {
+		return node;
+	}
+
+	/**
+	 * @param node the node to set
+	 */
+	protected void setNode(String node) {
+		this.node = node;
+	}
 
 	/**
 	 * @return the ttl
@@ -104,5 +136,6 @@ public class ServiceConfig {
 	public boolean equals(Object obj) {
 		return EqualsBuilder.reflectionEquals(this, obj);
 	}
+
 
 }

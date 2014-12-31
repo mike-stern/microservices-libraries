@@ -17,6 +17,8 @@ public class ServiceConfigBuilder {
 	private String id = null; // optional
 	private long ttl = 0; // optiona;
 	private String[] tags = null; //optional
+	private String address = null; // Auto-Filled
+	private String node = null; // Auto-filled
 	
 	public ServiceConfig build() {
 		ServiceConfig result = new ServiceConfig();
@@ -46,6 +48,14 @@ public class ServiceConfigBuilder {
 			tags = new String[0];
 		}
 		result.setTags(tags);
+		
+		if (StringUtils.isNotBlank(node)) {
+			result.setNode(node);
+		}
+		
+		if (StringUtils.isNotBlank(address)) {
+			result.setAddress(address);
+		}
 		
 		logger.debug("Created new service configuration: {}", result.toString());
 		
@@ -85,5 +95,19 @@ public class ServiceConfigBuilder {
 	 */
 	public void setTags(String[] tags) {
 		this.tags = tags;
+	}
+
+	/**
+	 * @param address the address to set
+	 */
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	/**
+	 * @param node the node to set
+	 */
+	public void setNode(String node) {
+		this.node = node;
 	}
 }
