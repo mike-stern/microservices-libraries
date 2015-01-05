@@ -63,9 +63,15 @@
 			<name>CIDA Public Nexus</name>
 			<url>http://cida.usgs.gov/maven/cida-public/</url>
 		</repository>
+                <repository>
+                        <id>cida-snapshots</id>
+			<name>NWIS Snapshots</name>
+			<url>https://internal.cida.usgs.gov/maven/content/repositories/cida-public-snapshots</url>
+                </repository>
 	</repositories>
 	
 	<properties>
+	    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	
 	<dependencies>
