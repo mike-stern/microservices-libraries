@@ -14,7 +14,7 @@ public class ServiceConfigBuilder {
 	private String name = null; // required
 	private int port = 0; //required
 	private String id = null; // optional
-	private long ttl = 0; // optiona;
+	private long ttl = 0; // optional;
 	private String[] tags = null; //optional
 	private String address = null; // Auto-Filled
 	private String node = null; // Auto-filled
