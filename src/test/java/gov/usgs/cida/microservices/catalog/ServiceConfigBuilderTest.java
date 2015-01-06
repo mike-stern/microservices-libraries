@@ -28,11 +28,11 @@ public class ServiceConfigBuilderTest {
 		logger.info("testBuildWithAllParams");
 		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
-		instance.setName(name);
-		instance.setId(id);
-		instance.setPort(port);
-		instance.setTtl(ttl);
-		instance.setTags(tags);
+		instance.setName(name)
+		.setId(id)
+		.setPort(port)
+		.setTtl(ttl)
+		.setTags(tags);
 		ServiceConfig result = instance.build();
 		assertNotNull(result);
 		Assert.assertArrayEquals(result.getTags(), tags);
@@ -47,10 +47,10 @@ public class ServiceConfigBuilderTest {
 		logger.info("testBuildWithoutName");
 		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
-		instance.setId(id);
-		instance.setPort(port);
-		instance.setTtl(ttl);
-		instance.setTags(tags);
+		instance.setId(id)
+		.setPort(port)
+		.setTtl(ttl)
+		.setTags(tags);
 		instance.build(); // Should hit error here
 	}
 	
@@ -59,11 +59,11 @@ public class ServiceConfigBuilderTest {
 		logger.info("testBuildWithPortAtZero");
 		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
-		instance.setName(name);
-		instance.setId(id);
-		instance.setPort(0);
-		instance.setTtl(ttl);
-		instance.setTags(tags);
+		instance.setName(name)
+		.setId(id)
+		.setPort(0)
+		.setTtl(ttl)
+		.setTags(tags);
 		instance.build(); // Should hit error here
 	}
 	
@@ -72,11 +72,11 @@ public class ServiceConfigBuilderTest {
 		logger.info("testBuildWithAllParams");
 		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
-		instance.setName(name);
-		instance.setId(id);
-		instance.setPort(port);
-		instance.setTtl(-2l);
-		instance.setTags(tags);
+		instance.setName(name)
+		.setId(id)
+		.setPort(port)
+		.setTtl(-2l)
+		.setTags(tags);
 		instance.build();
 	}
 
@@ -85,10 +85,10 @@ public class ServiceConfigBuilderTest {
 		logger.info("testBuildWithOutId");
 		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
-		instance.setName(name);
-		instance.setPort(port);
-		instance.setTtl(ttl);
-		instance.setTags(tags);
+		instance.setName(name)
+		.setPort(port)
+		.setTtl(ttl)
+		.setTags(tags);
 		ServiceConfig result = instance.build();
 		assertNotNull(result);
 		Assert.assertArrayEquals(result.getTags(), tags);
@@ -103,10 +103,10 @@ public class ServiceConfigBuilderTest {
 		logger.info("testBuildWithOutTtl");
 		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
-		instance.setName(name);
-		instance.setId(id);
-		instance.setPort(port);
-		instance.setTags(tags);
+		instance.setName(name)
+		.setId(id)
+		.setPort(port)
+		.setTags(tags);
 		ServiceConfig result = instance.build();
 		assertNotNull(result);
 		Assert.assertArrayEquals(result.getTags(), tags);
