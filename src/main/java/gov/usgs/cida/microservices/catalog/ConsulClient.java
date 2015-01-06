@@ -100,12 +100,12 @@ public class ConsulClient implements Client {
 		for (CatalogService service : serviceList) {
 			ServiceConfigBuilder builder = new ServiceConfigBuilder();
 			
-			builder.setAddress(service.getAddress());
-			builder.setNode(service.getNode());
-			builder.setId(service.getServiceId());
-			builder.setName(service.getServiceName());
-			builder.setPort(service.getServicePort());
-			builder.setTags(service.getServiceTags().toArray(new String[0]));
+			builder.setAddress(service.getAddress())
+			.setNode(service.getNode())
+			.setId(service.getServiceId())
+			.setName(service.getServiceName())
+			.setPort(service.getServicePort())
+			.setTags(service.getServiceTags().toArray(new String[0]));
 			
 			result.add(builder.build());
 		}

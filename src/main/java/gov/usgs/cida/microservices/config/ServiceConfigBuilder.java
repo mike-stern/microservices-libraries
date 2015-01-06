@@ -1,6 +1,5 @@
 package gov.usgs.cida.microservices.config;
 
-import gov.usgs.cida.microservices.config.ServiceConfig;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -65,49 +64,56 @@ public class ServiceConfigBuilder {
 	/**
 	 * @param name the name to set
 	 */
-	public void setName(String name) {
+	public ServiceConfigBuilder setName(String name) {
 		this.name = name;
+		return this;
 	}
 
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(String id) {
+	public ServiceConfigBuilder setId(String id) {
 		this.id = id;
+		return this;
 	}
 
 	/**
 	 * @param port the port to set
 	 */
-	public void setPort(int port) {
+	public ServiceConfigBuilder setPort(int port) {
 		this.port = port;
+		return this;
 	}
 
 	/**
 	 * @param ttl the ttl to set
 	 */
-	public void setTtl(long ttl) {
+	public ServiceConfigBuilder setTtl(long ttl) {
 		this.ttl = ttl;
+		return this;
 	}
 
 	/**
 	 * @param tags the tags to set
 	 */
-	public void setTags(String[] tags) {
+	public ServiceConfigBuilder setTags(String[] tags) {
 		this.tags = tags;
+		return this;
 	}
 
 	/**
 	 * @param address the address to set
 	 */
-	public void setAddress(String address) {
+	public ServiceConfigBuilder setAddress(String address) {
 		this.address = address;
+		return this;
 	}
 
 	/**
 	 * @param node the node to set
 	 */
-	public void setNode(String node) {
+	public ServiceConfigBuilder setNode(String node) {
 		this.node = node;
+		return this;
 	}
 }

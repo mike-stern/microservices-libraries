@@ -83,11 +83,11 @@ public class ConsulClientTestIT {
 		logger.info("testRegisterService");
 		ServiceConfigBuilder builder = new ServiceConfigBuilder();
 
-		builder.setName(name);
-		builder.setId(id);
-		builder.setPort(port);
-		builder.setTtl(ttl);
-		builder.setTags(tags);
+		builder.setName(name)
+		.setId(id)
+		.setPort(port)
+		.setTtl(ttl)
+		.setTags(tags);
 		ServiceConfig config = builder.build();
 
 		Client client = new ConsulClient(config);
@@ -104,11 +104,11 @@ public class ConsulClientTestIT {
 		logger.info("testDeRegisterService");
 		ServiceConfigBuilder builder = new ServiceConfigBuilder();
 
-		builder.setName(name);
-		builder.setId(id);
-		builder.setPort(port);
-		builder.setTtl(ttl);
-		builder.setTags(tags);
+		builder.setName(name)
+		.setId(id)
+		.setPort(port)
+		.setTtl(ttl)
+		.setTags(tags);
 		ServiceConfig config = builder.build();
 
 		Client client = new ConsulClient(config);
@@ -132,11 +132,11 @@ public class ConsulClientTestIT {
 		ServiceConfigBuilder builder = new ServiceConfigBuilder();
 		Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
 
-		builder.setName(name);
-		builder.setId(id);
-		builder.setPort(port);
-		builder.setTtl(ttl);
-		builder.setTags(tags);
+		builder.setName(name)
+		.setId(id)
+		.setPort(port)
+		.setTtl(ttl)
+		.setTags(tags);
 		ServiceConfig config = builder.build();
 
 		Client client = new ConsulClient(config);
