@@ -12,7 +12,7 @@ public interface DiscoveryClient {
 	 * to a Collection of URIs
 	 * @return 
 	 */
-	public Map<String, Map<String, Collection<URI>>> getServices();
+	public Map<String, Map<String, Collection<URI>>> getAllServices();
 	
 	/**
 	 * Get a collection of uris by service name and version
