@@ -6,12 +6,14 @@ import com.orbitz.consul.model.catalog.CatalogService;
 import com.orbitz.consul.option.CatalogOptions;
 import com.orbitz.consul.option.CatalogOptionsBuilder;
 import gov.usgs.cida.microservices.api.discovery.DiscoveryClient;
+import gov.usgs.cida.microservices.config.ConsulCatalogServiceConfigBuilder;
 import gov.usgs.cida.microservices.config.ServiceConfig;
 import gov.usgs.cida.microservices.config.ServiceConfigBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -96,12 +98,12 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	}
 
     @Override
-    public Map<String, Map<String, Collection<URI>>> getAllServices() {
+    public Map<String, Map<String, List<URI>>> getUrisForAllServices() {
 	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Collection<URI> getUrisFor(String serviceName, String version) {
+    public List<URI> getUrisFor(String serviceName, String version) {
 	List<CatalogService> services = getServices(serviceName, version);
 	List<URI> uris = new ArrayList(services.size());
 	for(CatalogService service : services){
@@ -137,6 +139,42 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	CatalogService catService = getRandomElement(services);
 	URI uri = buildServiceUri(catService);
 	return uri;
+    }
+
+    @Override
+    public Map<String, Map<String, List<ServiceConfig>>> getServiceConfigsForAllServices() {
+	CatalogClient catClient = getClient();
+	Map<String, List<String>> serviceToTags = catClient.getServices().getResponse();
+	Map<String, Map<String, List<ServiceConfig>>> returnMap = new HashMap<>();
+	for(Map.Entry<String, List<String>> entry : serviceToTags.entrySet()){
+	    List<String> tags = entry.getValue();
+	    String serviceName = entry.getKey();
+	    Map<String, List<ServiceConfig>> serviceSpecificMap = new HashMap<>();
+	    for(String tag : tags){
+		List<ServiceConfig> nameAndTagSpecificConfigs = getServiceConfigsFor(serviceName, tag);
+		serviceSpecificMap.put(tag, nameAndTagSpecificConfigs);
+	    }
+	    returnMap.put(serviceName, serviceSpecificMap);
+	}
+	return returnMap;
+    }
+
+    @Override
+    public List<ServiceConfig> getServiceConfigsFor(String serviceName, String version) {
+	CatalogClient catClient = getClient();
+	CatalogOptions catOpts = CatalogOptionsBuilder.builder().tag(version).build();
+	List<CatalogService> catServices = catClient.getService(serviceName, catOpts).getResponse();
+	List<ServiceConfig> serviceConfigs = new ArrayList<>(catServices.size());
+	for(CatalogService catService : catServices){
+	    serviceConfigs.add(new ConsulCatalogServiceConfigBuilder(catService).build());
+	}
+	return serviceConfigs;
+    }
+
+    @Override
+    public ServiceConfig getServiceConfigFor(String serviceName, String version) {
+	List<ServiceConfig> configs = getServiceConfigsFor(serviceName, version);
+	return getRandomElement(configs);
     }
 	
 }

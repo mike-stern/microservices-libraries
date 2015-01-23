@@ -1,6 +1,6 @@
 package gov.usgs.cida.microservices.catalog;
 
-import gov.usgs.cida.microservices.api.discovery.Client;
+import gov.usgs.cida.microservices.api.registration.RegistrationClient;
 import gov.usgs.cida.microservices.config.ServiceConfig;
 import gov.usgs.cida.microservices.config.ServiceConfigBuilder;
 import java.io.File;
@@ -22,13 +22,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author isuftin
- */
-public class ConsulClientTestIT {
+public class ConsulRegistrationAndDiscoveryClientsTestIT {
 
-	private static final Logger logger = LoggerFactory.getLogger(ConsulClientTestIT.class);
+	private static final Logger logger = LoggerFactory.getLogger(ConsulRegistrationAndDiscoveryClientsTestIT.class);
 	static Process p;
 	static InputStream consulInputStream;
 	static String consulLocation = "/usr/local/bin/consul";
@@ -44,7 +40,7 @@ public class ConsulClientTestIT {
 			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
 			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
 
-	public ConsulClientTestIT() {
+	public ConsulRegistrationAndDiscoveryClientsTestIT() {
 	}
 
 	@BeforeClass
@@ -90,8 +86,8 @@ public class ConsulClientTestIT {
 		.setTags(tags);
 		ServiceConfig config = builder.build();
 
-		Client client = new ConsulClient(config);
-		client.registerService();
+		RegistrationClient client = new ConsulRegistrationClient();
+		client.registerService(config);
 		Thread.sleep(1000);
 
 		Map<String, List<String>> services = client.getServices();
@@ -111,8 +107,8 @@ public class ConsulClientTestIT {
 		.setTags(tags);
 		ServiceConfig config = builder.build();
 
-		Client client = new ConsulClient(config);
-		client.registerService();
+		RegistrationClient client = new ConsulRegistrationClient();
+		client.registerService(config);
 		Thread.sleep(1000);
 
 		Map<String, List<String>> services = client.getServices();
