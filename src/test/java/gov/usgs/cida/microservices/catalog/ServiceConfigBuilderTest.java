@@ -19,6 +19,7 @@ public class ServiceConfigBuilderTest {
 	private static final Logger logger = LoggerFactory.getLogger(ServiceConfigBuilderTest.class);
 	String name = "Test Instance";
 	String id = "Test ID";
+	String address = "127.0.0.1";
 	int port = 8080;
 	long ttl = 5l;
 	String[] tags = new String[]{"test-tag-1", "test-tag-2"};
@@ -32,6 +33,7 @@ public class ServiceConfigBuilderTest {
 		.setId(id)
 		.setPort(port)
 		.setTtl(ttl)
+		.setAddress(address)
 		.setTags(tags);
 		ServiceConfig result = instance.build();
 		assertNotNull(result);
@@ -41,13 +43,26 @@ public class ServiceConfigBuilderTest {
 		assertEquals(result.getPort(), port);
 		assertEquals(result.getTtl(), ttl);
 	}
+	@Test(expected = IllegalArgumentException.class)
+	public void testBuildWithoutAddress() {
+		logger.info("testBuildWithoutAddress");
+		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
+		instance.setName(name)
+		.setId(id)
+		.setPort(port)
+		.setTtl(ttl)
+		.setTags(tags);
+		instance.build();
+	}
+	
 	@Test(expected = IllegalStateException.class)
 	public void testBuildWithoutName() {
 		logger.info("testBuildWithoutName");
 		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
 		instance.setId(id)
+		.setAddress(address)
 		.setPort(port)
 		.setTtl(ttl)
 		.setTags(tags);
@@ -60,6 +75,7 @@ public class ServiceConfigBuilderTest {
 		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
 		instance.setName(name)
+		.setAddress(address)
 		.setId(id)
 		.setPort(0)
 		.setTtl(ttl)
@@ -73,6 +89,7 @@ public class ServiceConfigBuilderTest {
 		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
 		instance.setName(name)
+		.setAddress(address)
 		.setId(id)
 		.setPort(port)
 		.setTtl(-2l)
@@ -86,6 +103,7 @@ public class ServiceConfigBuilderTest {
 		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
 		instance.setName(name)
+		.setAddress(address)
 		.setPort(port)
 		.setTtl(ttl)
 		.setTags(tags);
@@ -104,6 +122,7 @@ public class ServiceConfigBuilderTest {
 		ServiceConfigBuilder instance = new ServiceConfigBuilder();
 
 		instance.setName(name)
+		.setAddress(address)
 		.setId(id)
 		.setPort(port)
 		.setTags(tags);

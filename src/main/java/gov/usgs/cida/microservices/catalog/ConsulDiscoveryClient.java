@@ -27,7 +27,6 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	private List<CatalogClient> clients = new ArrayList<>();
 	private static final Random random = new Random();
 	
-	
 	private void addClient(String ipAddress, int port){
 	    this.clients.add(Consul.newClient(ipAddress, port).catalogClient());
 	}
@@ -77,36 +76,32 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	    }
 	}
 
-	public List<ServiceConfig> getService(String serviceName) {
-		CatalogClient cClient = getClient();
-		List<ServiceConfig> result = new ArrayList<>();
-		List<CatalogService> serviceList = cClient.getService(serviceName).getResponse();
-		for (CatalogService service : serviceList) {
-			ServiceConfigBuilder builder = new ServiceConfigBuilder();
-			
-			builder.setAddress(service.getAddress())
-			.setNode(service.getNode())
-			.setId(service.getServiceId())
-			.setName(service.getServiceName())
-			.setPort(service.getServicePort())
-			.setTags(service.getServiceTags().toArray(new String[0]));
-			
-			result.add(builder.build());
-		}
-		
-		return result;
-	}
-
     @Override
     public Map<String, Map<String, List<URI>>> getUrisForAllServices() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	Map<String, Map<String, List<URI>>> returnMap = new HashMap<>();
+	Map<String, Map<String, List<ServiceConfig>>> allServiceConfigs = getServiceConfigsForAllServices();
+	for(Map.Entry<String, Map<String, List<ServiceConfig>>> serviceToTagMap : allServiceConfigs.entrySet()){
+	    String serviceName = serviceToTagMap.getKey();
+	    Map<String, List<URI>> tagAndUriMap = new HashMap<>();
+	    Map<String, List<ServiceConfig>> tagToServiceConfig = serviceToTagMap.getValue();
+	    for(Map.Entry<String, List<ServiceConfig>> innerEntry : tagToServiceConfig.entrySet()){
+		String tag = innerEntry.getKey();
+		List<URI> tagSpecificUris = new ArrayList<>();
+		for(ServiceConfig serviceConfig : innerEntry.getValue()){
+		    tagSpecificUris.add(buildServiceUri(serviceConfig));
+		}
+		tagAndUriMap.put(tag, tagSpecificUris);
+	    }
+	    returnMap.put(serviceName, tagAndUriMap);
+	}
+	return returnMap;
     }
 
     @Override
     public List<URI> getUrisFor(String serviceName, String version) {
-	List<CatalogService> services = getServices(serviceName, version);
+	List<ServiceConfig> services = getServiceConfigsFor(serviceName, version);
 	List<URI> uris = new ArrayList(services.size());
-	for(CatalogService service : services){
+	for(ServiceConfig service : services){
 	    uris.add(buildServiceUri(service));
 	}
 	return uris;
@@ -118,9 +113,9 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	List<CatalogService> services = catClient.getService(serviceName, catOpts).getResponse();
 	return services;
     }
-    private URI buildServiceUri(CatalogService catService){
-	String address = catService.getAddress();
-	int port = catService.getServicePort();
+    private URI buildServiceUri(ServiceConfig svcConfig){
+	String address = svcConfig.getAddress();
+	int port = svcConfig.getPort();
 	URIBuilder uriBuilder = new URIBuilder();
 	uriBuilder.setHost(address);
 	uriBuilder.setPort(port);
@@ -135,9 +130,8 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
     
     @Override
     public URI getUriFor(String serviceName, String version) {
-	List<CatalogService> services = getServices(serviceName, version);
-	CatalogService catService = getRandomElement(services);
-	URI uri = buildServiceUri(catService);
+	ServiceConfig service = getServiceConfigFor(serviceName, version);
+	URI uri = buildServiceUri(service);
 	return uri;
     }
 
@@ -161,12 +155,11 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 
     @Override
     public List<ServiceConfig> getServiceConfigsFor(String serviceName, String version) {
-	CatalogClient catClient = getClient();
-	CatalogOptions catOpts = CatalogOptionsBuilder.builder().tag(version).build();
-	List<CatalogService> catServices = catClient.getService(serviceName, catOpts).getResponse();
+	List<CatalogService> catServices = getServices(serviceName, version);
 	List<ServiceConfig> serviceConfigs = new ArrayList<>(catServices.size());
 	for(CatalogService catService : catServices){
-	    serviceConfigs.add(new ConsulCatalogServiceConfigBuilder(catService).build());
+	    ServiceConfig svcConfig = new ConsulCatalogServiceConfigBuilder(catService).build();
+	    serviceConfigs.add(svcConfig);
 	}
 	return serviceConfigs;
     }
@@ -176,5 +169,4 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	List<ServiceConfig> configs = getServiceConfigsFor(serviceName, version);
 	return getRandomElement(configs);
     }
-	
 }

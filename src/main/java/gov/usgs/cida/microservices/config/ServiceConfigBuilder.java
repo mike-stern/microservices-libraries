@@ -23,12 +23,12 @@ public class ServiceConfigBuilder {
 		ServiceConfig result = new ServiceConfig();
 		
 		if (StringUtils.isBlank(name)) {
-			throw new IllegalStateException("Service name is required");
+			throw new IllegalStateException("a service name is required");
 		}
 		result.setName(name);
 		
 		if (port < 1) {
-			throw new IllegalStateException("Service port is required to be a positive integer");
+			throw new IllegalStateException("The service port is required to be a positive integer");
 		}
 		result.setPort(port);
 		
@@ -39,7 +39,7 @@ public class ServiceConfigBuilder {
 		}
 		
 		if (ttl < 0) {
-			throw new IllegalStateException("TTL needs to a positive value");
+			throw new IllegalStateException("The TTL needs to a positive value");
 		}
 		result.setTtl(ttl);
 		
@@ -54,6 +54,9 @@ public class ServiceConfigBuilder {
 		
 		if (StringUtils.isNotBlank(address)) {
 			result.setAddress(address);
+		}
+		else{
+		    throw new IllegalArgumentException("an address is required");
 		}
 		
 		logger.debug("Created new service configuration: {}", result.toString());
