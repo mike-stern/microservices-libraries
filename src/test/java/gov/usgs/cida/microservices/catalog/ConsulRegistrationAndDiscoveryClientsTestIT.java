@@ -84,7 +84,6 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		builder.setName(name)
 		.setId(id)
 		.setPort(port)
-		.setTtl(ttl)
 		.setAddress(address)
 		.setTags(tags);
 		ServiceConfig config = builder.build();

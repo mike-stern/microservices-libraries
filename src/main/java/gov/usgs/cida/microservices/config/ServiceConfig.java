@@ -94,19 +94,6 @@ public class ServiceConfig {
 		this.node = node;
 	}
 
-	/**
-	 * @return the ttl
-	 */
-	public long getTtl() {
-		return ttl;
-	}
-
-	/**
-	 * @param ttl the ttl to set
-	 */
-	protected void setTtl(long ttl) {
-		this.ttl = ttl;
-	}
 
 	/**
 	 * @return the tags

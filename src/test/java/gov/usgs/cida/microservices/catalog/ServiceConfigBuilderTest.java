@@ -21,7 +21,6 @@ public class ServiceConfigBuilderTest {
 	String id = "Test ID";
 	String address = "127.0.0.1";
 	int port = 8080;
-	long ttl = 5l;
 	String[] tags = new String[]{"test-tag-1", "test-tag-2"};
 
 	@Test
@@ -32,7 +31,6 @@ public class ServiceConfigBuilderTest {
 		instance.setName(name)
 		.setId(id)
 		.setPort(port)
-		.setTtl(ttl)
 		.setAddress(address)
 		.setTags(tags);
 		ServiceConfig result = instance.build();
@@ -41,7 +39,6 @@ public class ServiceConfigBuilderTest {
 		assertEquals(result.getName(), name);
 		assertEquals(result.getId(), id);
 		assertEquals(result.getPort(), port);
-		assertEquals(result.getTtl(), ttl);
 	}
 	@Test(expected = IllegalArgumentException.class)
 	public void testBuildWithoutAddress() {
@@ -51,7 +48,6 @@ public class ServiceConfigBuilderTest {
 		instance.setName(name)
 		.setId(id)
 		.setPort(port)
-		.setTtl(ttl)
 		.setTags(tags);
 		instance.build();
 	}
@@ -64,7 +60,6 @@ public class ServiceConfigBuilderTest {
 		instance.setId(id)
 		.setAddress(address)
 		.setPort(port)
-		.setTtl(ttl)
 		.setTags(tags);
 		instance.build(); // Should hit error here
 	}
@@ -78,23 +73,8 @@ public class ServiceConfigBuilderTest {
 		.setAddress(address)
 		.setId(id)
 		.setPort(0)
-		.setTtl(ttl)
 		.setTags(tags);
 		instance.build(); // Should hit error here
-	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void testBuildWithTtlLessThanZero() {
-		logger.info("testBuildWithAllParams");
-		ServiceConfigBuilder instance = new ServiceConfigBuilder();
-
-		instance.setName(name)
-		.setAddress(address)
-		.setId(id)
-		.setPort(port)
-		.setTtl(-2l)
-		.setTags(tags);
-		instance.build();
 	}
 
 	@Test
@@ -105,7 +85,6 @@ public class ServiceConfigBuilderTest {
 		instance.setName(name)
 		.setAddress(address)
 		.setPort(port)
-		.setTtl(ttl)
 		.setTags(tags);
 		ServiceConfig result = instance.build();
 		assertNotNull(result);
@@ -113,7 +92,6 @@ public class ServiceConfigBuilderTest {
 		assertEquals(result.getName(), name);
 		assertNotEquals(result.getId(), id);
 		assertEquals(result.getPort(), port);
-		assertEquals(result.getTtl(), ttl);
 	}
 
 	@Test
@@ -132,8 +110,6 @@ public class ServiceConfigBuilderTest {
 		assertEquals(result.getName(), name);
 		assertEquals(result.getId(), id);
 		assertEquals(result.getPort(), port);
-		assertNotEquals(result.getTtl(), ttl);
-		assertEquals(result.getTtl(), 0l);
 	}
 
 }

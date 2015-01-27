@@ -13,6 +13,7 @@ public class ConsulRegistrationClient implements RegistrationClient{
     private static final Logger logger = LoggerFactory.getLogger(ConsulRegistrationClient.class);
     public static final int DEFAULT_CONSUL_PORT = 8500;
     public static final String DEFAULT_CONSUL_ADDRESS = "localhost";
+    public static final long DEFAULT_CONSUL_TTL = 10L;
     private final AgentClient agentClient;
     
     public ConsulRegistrationClient(){
@@ -40,7 +41,8 @@ public class ConsulRegistrationClient implements RegistrationClient{
 	if (config == null) {
 		throw new NullPointerException("Configuration may not be null");
 	}
-	agentClient.register(config.getPort(), config.getTtl(), config.getName(), config.getName(), config.getTags());
+	//todo: make ttl configurable
+	agentClient.register(config.getPort(), DEFAULT_CONSUL_TTL, config.getName(), config.getName(), config.getTags());
 	logger.info("Registered new service: {}", config.getName());
     }
 

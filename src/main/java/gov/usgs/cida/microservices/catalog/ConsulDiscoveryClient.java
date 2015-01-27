@@ -163,15 +163,9 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
     public List<ServiceConfig> getServiceConfigsFor(String serviceName, String version) {
 	List<CatalogService> catServices = getServices(serviceName, version);
 	List<ServiceConfig> serviceConfigs = new ArrayList<>(catServices.size());
-	HealthClient hClient = getHealthClient();
 	for(CatalogService catService : catServices){
 	    ServiceConfig svcConfig = new ConsulCatalogServiceConfigBuilder(catService).build();
 	    CatalogOptions catOpts = (CatalogOptionsBuilder.builder()).tag(version).build();
-	    AgentClient aClient = Consul.newClient(catService.getAddress(), 8500).agentClient();
-	    
-	    ConsulResponse<List<HealthCheck>> healthChecks = hClient.getNodeChecks(catService.getNode(), catOpts);
-	    
-	    
 	    serviceConfigs.add(svcConfig);
 	}
 	return serviceConfigs;
