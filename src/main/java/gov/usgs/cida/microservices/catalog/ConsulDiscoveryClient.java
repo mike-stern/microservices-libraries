@@ -16,11 +16,14 @@ import gov.usgs.cida.microservices.config.ServiceConfigBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +66,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	 * @param ipAddress
 	 * @param port 
 	 */
-	public ConsulDiscoveryClient(Collection<String> ipAddresses, int port){
+	public ConsulDiscoveryClient(Set<String> ipAddresses, int port){
 	    for(String ipAddress : ipAddresses){
 		addClient(ipAddress, port);
 	    }
@@ -83,16 +86,17 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	}
 
     @Override
-    public Map<String, Map<String, List<URI>>> getUrisForAllServices() {
-	Map<String, Map<String, List<URI>>> returnMap = new HashMap<>();
-	Map<String, Map<String, List<ServiceConfig>>> allServiceConfigs = getServiceConfigsForAllServices();
-	for(Map.Entry<String, Map<String, List<ServiceConfig>>> serviceToTagMap : allServiceConfigs.entrySet()){
+    public Map<String, Map<String, Set<URI>>> getUrisForAllServices() {
+	Map<String, Map<String, Set<URI>>> returnMap = new HashMap<>();
+	Map<String, Map<String, Set<ServiceConfig>>> allServiceConfigs = getServiceConfigsForAllServices();
+	for(Map.Entry<String, Map<String, Set<ServiceConfig>>> serviceToTagMap : allServiceConfigs.entrySet()){
 	    String serviceName = serviceToTagMap.getKey();
-	    Map<String, List<URI>> tagAndUriMap = new HashMap<>();
-	    Map<String, List<ServiceConfig>> tagToServiceConfig = serviceToTagMap.getValue();
-	    for(Map.Entry<String, List<ServiceConfig>> innerEntry : tagToServiceConfig.entrySet()){
+	    Map<String, Set<URI>> tagAndUriMap = new HashMap<>();
+	    Map<String, Set<ServiceConfig>> tagToServiceConfig = serviceToTagMap.getValue();
+	    for(Map.Entry<String, Set<ServiceConfig>> innerEntry : tagToServiceConfig.entrySet()){
 		String tag = innerEntry.getKey();
-		List<URI> tagSpecificUris = new ArrayList<>();
+		//use a Set to ensure uniqueness
+		Set<URI> tagSpecificUris = new HashSet<>();
 		for(ServiceConfig serviceConfig : innerEntry.getValue()){
 		    tagSpecificUris.add(buildServiceUri(serviceConfig));
 		}
@@ -104,9 +108,9 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
     }
 
     @Override
-    public List<URI> getUrisFor(String serviceName, String version) {
-	List<ServiceConfig> services = getServiceConfigsFor(serviceName, version);
-	List<URI> uris = new ArrayList(services.size());
+    public Set<URI> getUrisFor(String serviceName, String version) {
+	Set<ServiceConfig> services = getServiceConfigsFor(serviceName, version);
+	Set<URI> uris = new HashSet(services.size());
 	for(ServiceConfig service : services){
 	    uris.add(buildServiceUri(service));
 	}
@@ -142,16 +146,17 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
     }
 
     @Override
-    public Map<String, Map<String, List<ServiceConfig>>> getServiceConfigsForAllServices() {
+    public Map<String, Map<String, Set<ServiceConfig>>> getServiceConfigsForAllServices() {
 	CatalogClient catClient = getCatalogClient();
 	Map<String, List<String>> serviceToTags = catClient.getServices().getResponse();
-	Map<String, Map<String, List<ServiceConfig>>> returnMap = new HashMap<>();
+	Map<String, Map<String, Set<ServiceConfig>>> returnMap = new HashMap<>();
 	for(Map.Entry<String, List<String>> entry : serviceToTags.entrySet()){
 	    List<String> tags = entry.getValue();
 	    String serviceName = entry.getKey();
-	    Map<String, List<ServiceConfig>> serviceSpecificMap = new HashMap<>();
+	    Map<String, Set<ServiceConfig>> serviceSpecificMap = new HashMap<>();
 	    for(String tag : tags){
-		List<ServiceConfig> nameAndTagSpecificConfigs = getServiceConfigsFor(serviceName, tag);
+		Set<ServiceConfig> nameAndTagSpecificConfigs = getServiceConfigsFor(serviceName, tag);
+		
 		serviceSpecificMap.put(tag, nameAndTagSpecificConfigs);
 	    }
 	    returnMap.put(serviceName, serviceSpecificMap);
@@ -160,12 +165,11 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
     }
 
     @Override
-    public List<ServiceConfig> getServiceConfigsFor(String serviceName, String version) {
+    public Set<ServiceConfig> getServiceConfigsFor(String serviceName, String version) {
 	List<CatalogService> catServices = getServices(serviceName, version);
-	List<ServiceConfig> serviceConfigs = new ArrayList<>(catServices.size());
+	Set<ServiceConfig> serviceConfigs = new HashSet<>(catServices.size());
 	for(CatalogService catService : catServices){
 	    ServiceConfig svcConfig = new ConsulCatalogServiceConfigBuilder(catService).build();
-	    CatalogOptions catOpts = (CatalogOptionsBuilder.builder()).tag(version).build();
 	    serviceConfigs.add(svcConfig);
 	}
 	return serviceConfigs;
@@ -173,7 +177,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 
     @Override
     public ServiceConfig getServiceConfigFor(String serviceName, String version) {
-	List<ServiceConfig> configs = getServiceConfigsFor(serviceName, version);
-	return getRandomElement(configs);
+	Set<ServiceConfig> configs = getServiceConfigsFor(serviceName, version);
+	return configs.iterator().next();
     }
 }

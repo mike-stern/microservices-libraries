@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.cxf.helpers.FileUtils;
 import org.junit.After;
@@ -29,14 +30,13 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	private static final Logger logger = LoggerFactory.getLogger(ConsulRegistrationAndDiscoveryClientsTestIT.class);
 	static Process p;
 	static InputStream consulInputStream;
-	String name = "test_instance";
-	String id = "test_id";
+	String name = "test-name";
+	String id = "test-id";
 	String address = "127.0.0.1";
 	int port = 8080;
-	long ttl = 5l;
 	String[] tags = new String[]{"test-tag-1", "test-tag-2"};
 	static File tmpDir;
-	static final String node = "unit_test";
+	static final String node = "test-node";
 	private static final String IPADDRESS_PATTERN
 			= "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
 			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
@@ -77,6 +77,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		Thread.sleep(3000);
 
 		FileUtils.delete(tmpDir);
+		logger.debug("deleted temp dir");
 	}
 
 	@Test
@@ -98,17 +99,17 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		
 		DiscoveryClient dClient = new ConsulDiscoveryClient("127.0.0.1", 8500);
 		
-		Map<String, Map<String, List<ServiceConfig>>> services = dClient.getServiceConfigsForAllServices();
+		Map<String, Map<String, Set<ServiceConfig>>> services = dClient.getServiceConfigsForAllServices();
 		Assert.assertFalse(services.isEmpty());
 		assertEquals(2, services.keySet().size());
 		assertTrue(services.containsKey(config.getName()));
-		Map<String, List<ServiceConfig>> serviceEntry = services.get(config.getName());
+		Map<String, Set<ServiceConfig>> serviceEntry = services.get(config.getName());
 		assertEquals(serviceEntry.keySet().size(), config.getTags().length);
 		for(String tag : config.getTags()){
 		    assertTrue(serviceEntry.containsKey(tag));
-		    List<ServiceConfig> versionConfigs = serviceEntry.get(tag);
-		    assertEquals(2, versionConfigs.size());
-		    ServiceConfig discoveredConfig = versionConfigs.get(0);
+		    Set<ServiceConfig> versionConfigs = serviceEntry.get(tag);
+		    assertEquals(1, versionConfigs.size());
+		    ServiceConfig discoveredConfig = versionConfigs.iterator().next();
 		    assertTrue(discoveredConfig.equals(config));
 		}
 		

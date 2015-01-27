@@ -47,7 +47,6 @@ public class ConsulRegistrationClient implements RegistrationClient{
 	reg.setName(config.getName());
 	reg.setPort(config.getPort());
 	reg.setId(config.getId());
-	reg.setPort(config.getPort());
 	reg.setTags(config.getTags());
 	
 	//todo: make Check configurable
@@ -56,7 +55,6 @@ public class ConsulRegistrationClient implements RegistrationClient{
 	reg.setCheck(check);
 	
 	agentClient.register(reg);
-	agentClient.register(config.getPort(), DEFAULT_CONSUL_TTL, config.getName(), config.getName(), config.getTags());
 	logger.info("Registered new service: {}({})@{}:{} with id: {}", config.getName(), config.getTags(), config.getAddress(), config.getPort(), config.getId());
     }
 

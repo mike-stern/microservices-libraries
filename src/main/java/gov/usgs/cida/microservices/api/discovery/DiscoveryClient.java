@@ -5,22 +5,23 @@ import java.net.URI;
 import java.util.List;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface DiscoveryClient {
 
 	/**
 	 * Retrieves a map of known service names to a map of service versions
-	 * to a List of URIs
+	 * to a Set of URIs
 	 * @return 
 	 */
-	public Map<String, Map<String, List<URI>>> getUrisForAllServices();
+	public Map<String, Map<String, Set<URI>>> getUrisForAllServices();
 	
 	/**
 	 * Retrieves a map of known service names to a map of service versions
-	 * to a List of ServiceConfigs
+	 * to a Set of ServiceConfigs
 	 * @return 
 	 */
-	public Map<String, Map<String, List<ServiceConfig>>> getServiceConfigsForAllServices();
+	public Map<String, Map<String, Set<ServiceConfig>>> getServiceConfigsForAllServices();
 	
 	/**
 	 * Get a List of uris by service name and version
@@ -29,7 +30,7 @@ public interface DiscoveryClient {
 	 * @param version
 	 * @return 
 	 */
-	public List<URI> getUrisFor(String serviceName, String version);
+	public Set<URI> getUrisFor(String serviceName, String version);
 	
 	/**
 	 * Get a List of ServiceConfigs by service name and version
@@ -38,7 +39,7 @@ public interface DiscoveryClient {
 	 * @param version
 	 * @return 
 	 */
-	public List<ServiceConfig> getServiceConfigsFor(String serviceName, String version);
+	public Set<ServiceConfig> getServiceConfigsFor(String serviceName, String version);
 	
 	
 	/**
