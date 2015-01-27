@@ -58,7 +58,9 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	@Before
 	public void setUp() throws IOException, InterruptedException {
 		tmpDir = FileUtils.createTmpDir();
-		p = Runtime.getRuntime().exec("consul agent -server -bootstrap-expect 1 -data-dir " + tmpDir.getCanonicalPath() + " -node unitTest -bind=" + address +" -client=" + address);
+		String cmd = "consul agent -server -bootstrap-expect 1 -data-dir " + tmpDir.getCanonicalPath() + " -node unitTest -bind=" + address +" -client=" + address;
+		logger.debug("running the following command:" + cmd);
+		p = Runtime.getRuntime().exec(cmd);
 		consulInputStream = p.getInputStream();
 		Thread.sleep(3000);
 	}
@@ -103,7 +105,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		for(String tag : config.getTags()){
 		    assertTrue(serviceEntry.containsKey(tag));
 		    List<ServiceConfig> versionConfigs = serviceEntry.get(tag);
-		    assertEquals(1, versionConfigs.size());
+		    assertEquals(2, versionConfigs.size());
 		    ServiceConfig discoveredConfig = versionConfigs.get(0);
 		    assertTrue(discoveredConfig.equals(config));
 		}

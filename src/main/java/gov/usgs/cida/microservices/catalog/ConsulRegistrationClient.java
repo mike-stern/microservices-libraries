@@ -2,6 +2,7 @@ package gov.usgs.cida.microservices.catalog;
 
 import com.orbitz.consul.AgentClient;
 import com.orbitz.consul.Consul;
+import com.orbitz.consul.model.agent.Registration;
 import gov.usgs.cida.microservices.api.registration.RegistrationClient;
 import gov.usgs.cida.microservices.config.ServiceConfig;
 import java.util.UUID;
@@ -41,9 +42,22 @@ public class ConsulRegistrationClient implements RegistrationClient{
 	if (config == null) {
 		throw new NullPointerException("Configuration may not be null");
 	}
-	//todo: make ttl configurable
+		
+	Registration reg = new Registration();
+	reg.setName(config.getName());
+	reg.setPort(config.getPort());
+	reg.setId(config.getId());
+	reg.setPort(config.getPort());
+	reg.setTags(config.getTags());
+	
+	//todo: make Check configurable
+    	Registration.Check check = new Registration.Check();
+	check.setTtl(DEFAULT_CONSUL_TTL + "s");
+	reg.setCheck(check);
+	
+	agentClient.register(reg);
 	agentClient.register(config.getPort(), DEFAULT_CONSUL_TTL, config.getName(), config.getName(), config.getTags());
-	logger.info("Registered new service: {}", config.getName());
+	logger.info("Registered new service: {}({})@{}:{} with id: {}", config.getName(), config.getTags(), config.getAddress(), config.getPort(), config.getId());
     }
 
     @Override
