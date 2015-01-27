@@ -124,16 +124,18 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	return services;
     }
     private URI buildServiceUri(ServiceConfig svcConfig){
-	String address = svcConfig.getAddress();
-	int port = svcConfig.getPort();
-	URIBuilder uriBuilder = new URIBuilder();
-	uriBuilder.setHost(address);
-	uriBuilder.setPort(port);
-	URI uri;
-	try {
-	    uri = uriBuilder.build();
-	} catch (URISyntaxException ex) {
-	    throw new RuntimeException("Error Building URI from information provided by consul", ex);
+	URI uri = null;
+	if(null != svcConfig){
+	    String address = svcConfig.getAddress();
+	    int port = svcConfig.getPort();
+	    URIBuilder uriBuilder = new URIBuilder();
+	    uriBuilder.setHost(address);
+	    uriBuilder.setPort(port);
+	    try {
+		uri = uriBuilder.build();
+	    } catch (URISyntaxException ex) {
+		throw new RuntimeException("Error Building URI from information provided by consul", ex);
+	    }
 	}
 	return uri;
     }
@@ -178,6 +180,6 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
     @Override
     public ServiceConfig getServiceConfigFor(String serviceName, String version) {
 	Set<ServiceConfig> configs = getServiceConfigsFor(serviceName, version);
-	return configs.iterator().next();
+	return configs.isEmpty() ? null : configs.iterator().next();
     }
 }

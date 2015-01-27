@@ -46,6 +46,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
 	public static ServiceConfig config;
 	static DiscoveryClient dClient;
+	static RegistrationClient rClient;
 	
 	public ConsulRegistrationAndDiscoveryClientsTestIT() {
 	}
@@ -76,7 +77,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		p = Runtime.getRuntime().exec(cmd);
 		consulInputStream = p.getInputStream();
 		Thread.sleep(3000);
-		RegistrationClient rClient = new ConsulRegistrationClient();
+		rClient = new ConsulRegistrationClient();
 		rClient.registerService(config);
 		Thread.sleep(1000);
 		dClient = new ConsulDiscoveryClient(address, 8500);
@@ -133,54 +134,14 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		    assertEquals(expected, discoveredUri);
 		}
 	}
-//	@Test
-//	public void testDeRegisterService() throws InterruptedException {
-//		logger.info("testDeRegisterService");
-//		ServiceConfigBuilder builder = new ServiceConfigBuilder();
-//
-//		builder.setName(name)
-//		.setId(id)
-//		.setPort(port)
-//		.setTtl(ttl)
-//		.setTags(tags);
-//		ServiceConfig config = builder.build();
-//
-//		RegistrationClient client = new ConsulRegistrationClient();
-//		client.registerService(config);
-//		Thread.sleep(1000);
-//
-//		Map<String, List<String>> services = client.getServices();
-//		assertFalse(services.isEmpty());
-//		assertEquals(2, services.keySet().size());
-//
-//		client.deregisterService();
-//		Thread.sleep(1000);
-//
-//		services = client.getServices();
-//		assertEquals(1, services.keySet().size());
-//	}
-//
-//	@Test
-//	public void testGetServiceByName() throws InterruptedException {
-//		logger.info("testGetServiceByName");
-//		ServiceConfigBuilder builder = new ServiceConfigBuilder();
-//		Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
-//
-//		builder.setName(name)
-//		.setId(id)
-//		.setPort(port)
-//		.setTtl(ttl)
-//		.setTags(tags);
-//		ServiceConfig config = builder.build();
-//
-//		Client client = new ConsulClient(config);
-//		client.registerService();
-//		Thread.sleep(1000);
-//
-//		List<ServiceConfig> service = client.getService(name);
-//		assertEquals(1, service.size());
-//		assertTrue(pattern.matcher(service.get(0).getAddress()).matches());
-//		assertEquals(8080, service.get(0).getPort());
-//	}
-
+	@Test
+	public void testDeRegisterService() throws InterruptedException {
+		
+		rClient.deregisterService(config);
+		Thread.sleep(1000);
+		ServiceConfig svc = dClient.getServiceConfigFor(config.getName(), config.getTags()[0]);
+		Assert.assertNull(svc);
+		URI uri = dClient.getUriFor(config.getName(), config.getTags()[0]);
+		Assert.assertNull(uri);
+	}
 }
