@@ -1,8 +1,12 @@
 package gov.usgs.cida.microservices.catalog;
 
+import com.orbitz.consul.AgentClient;
 import com.orbitz.consul.CatalogClient;
 import com.orbitz.consul.Consul;
+import com.orbitz.consul.HealthClient;
+import com.orbitz.consul.model.ConsulResponse;
 import com.orbitz.consul.model.catalog.CatalogService;
+import com.orbitz.consul.model.health.HealthCheck;
 import com.orbitz.consul.option.CatalogOptions;
 import com.orbitz.consul.option.CatalogOptionsBuilder;
 import gov.usgs.cida.microservices.api.discovery.DiscoveryClient;
@@ -24,17 +28,19 @@ import org.slf4j.LoggerFactory;
 public class ConsulDiscoveryClient implements DiscoveryClient {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ConsulDiscoveryClient.class);
-	private List<CatalogClient> clients = new ArrayList<>();
+	private List<Consul> clients = new ArrayList<>();
 	private static final Random random = new Random();
 	
 	private void addClient(String ipAddress, int port){
-	    this.clients.add(Consul.newClient(ipAddress, port).catalogClient());
+	    this.clients.add(Consul.newClient(ipAddress, port));
 	}
 	
-	private CatalogClient getClient(){
-	    return getRandomElement(clients);
+	private CatalogClient getCatalogClient(){
+	    return getRandomElement(clients).catalogClient();
 	}
-	
+	private HealthClient getHealthClient(){
+	    return getRandomElement(clients).healthClient();
+	}
 	private static <T> T getRandomElement(List<T> list){
 	    int randomIndex = random.nextInt(list.size());
 	    return list.get(randomIndex);
@@ -107,7 +113,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	return uris;
     }
     private List<CatalogService> getServices(String serviceName, String version){
-	CatalogClient catClient = getClient();
+	CatalogClient catClient = getCatalogClient();
 	CatalogOptions catOpts;
 	catOpts = CatalogOptionsBuilder.builder().tag(version).build();
 	List<CatalogService> services = catClient.getService(serviceName, catOpts).getResponse();
@@ -137,7 +143,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 
     @Override
     public Map<String, Map<String, List<ServiceConfig>>> getServiceConfigsForAllServices() {
-	CatalogClient catClient = getClient();
+	CatalogClient catClient = getCatalogClient();
 	Map<String, List<String>> serviceToTags = catClient.getServices().getResponse();
 	Map<String, Map<String, List<ServiceConfig>>> returnMap = new HashMap<>();
 	for(Map.Entry<String, List<String>> entry : serviceToTags.entrySet()){
@@ -157,8 +163,15 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
     public List<ServiceConfig> getServiceConfigsFor(String serviceName, String version) {
 	List<CatalogService> catServices = getServices(serviceName, version);
 	List<ServiceConfig> serviceConfigs = new ArrayList<>(catServices.size());
+	HealthClient hClient = getHealthClient();
 	for(CatalogService catService : catServices){
 	    ServiceConfig svcConfig = new ConsulCatalogServiceConfigBuilder(catService).build();
+	    CatalogOptions catOpts = (CatalogOptionsBuilder.builder()).tag(version).build();
+	    AgentClient aClient = Consul.newClient(catService.getAddress(), 8500).agentClient();
+	    
+	    ConsulResponse<List<HealthCheck>> healthChecks = hClient.getNodeChecks(catService.getNode(), catOpts);
+	    
+	    
 	    serviceConfigs.add(svcConfig);
 	}
 	return serviceConfigs;

@@ -98,9 +98,20 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		Map<String, Map<String, List<ServiceConfig>>> services = dClient.getServiceConfigsForAllServices();
 		Assert.assertFalse(services.isEmpty());
 		assertEquals(2, services.keySet().size());
-		Map<String, Map<String, List<URI>>> uris = dClient.getUrisForAllServices();
-		Assert.assertFalse(uris.isEmpty());
-		assertEquals(2, uris.keySet().size());
+		assertTrue(services.containsKey(config.getName()));
+		Map<String, List<ServiceConfig>> serviceEntry = services.get(config.getName());
+		assertEquals(serviceEntry.keySet().size(), config.getTags().length);
+		for(String tag : config.getTags()){
+		    assertTrue(serviceEntry.containsKey(tag));
+		    List<ServiceConfig> versionConfigs = serviceEntry.get(tag);
+		    assertEquals(1, versionConfigs.size());
+		    ServiceConfig discoveredConfig = versionConfigs.get(0);
+		    assertTrue(discoveredConfig.equals(config));
+		}
+		
+//		Map<String, Map<String, List<URI>>> uris = dClient.getUrisForAllServices();
+//		Assert.assertFalse(uris.isEmpty());
+//		assertEquals(2, uris.keySet().size());
 	}
 
 //	@Test
