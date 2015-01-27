@@ -36,6 +36,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	long ttl = 5l;
 	String[] tags = new String[]{"test-tag-1", "test-tag-2"};
 	static File tmpDir;
+	static final String node = "unit_test";
 	private static final String IPADDRESS_PATTERN
 			= "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
 			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
@@ -58,7 +59,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	@Before
 	public void setUp() throws IOException, InterruptedException {
 		tmpDir = FileUtils.createTmpDir();
-		String cmd = "consul agent -server -bootstrap-expect 1 -data-dir " + tmpDir.getCanonicalPath() + " -node unitTest -bind=" + address +" -client=" + address;
+		String cmd = "consul agent -server -bootstrap-expect 1 -data-dir " + tmpDir.getCanonicalPath() + " -node "+ node + " -bind=" + address +" -client=" + address;
 		logger.debug("running the following command:" + cmd);
 		p = Runtime.getRuntime().exec(cmd);
 		consulInputStream = p.getInputStream();
@@ -84,6 +85,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		ServiceConfigBuilder builder = new ServiceConfigBuilder();
 
 		builder.setName(name)
+		.setNode(node)
 		.setId(id)
 		.setPort(port)
 		.setAddress(address)
