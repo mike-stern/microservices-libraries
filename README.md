@@ -9,9 +9,10 @@ Testing
 To run integration tests, install consul.
 
 The integration tests do not run in the default build. To run them you must:
-	* Activate a profile
-	* Specify a bind address
-	* Specify a port for the consul agent to listen on
+
+ * Activate a profile
+ * Specify a bind address
+ * Specify a port for the consul agent to listen on
 
 Example:
 ```
