@@ -73,8 +73,8 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	public void setUp() throws IOException, InterruptedException {
 		tmpDir = FileUtils.createTmpDir();
 		String cmd = "consul agent -server -bootstrap-expect 1 -data-dir " + tmpDir.getCanonicalPath() + " -node "+ node + " -bind=" + address +" -client=" + address;
-		logger.debug("running the following command:" + cmd);
-		p = Runtime.getRuntime().exec(cmd);
+		logger.info("running the following command in bash:" + cmd);
+		p = Runtime.getRuntime().exec(new String[]{"bash", "-c", cmd});
 		consulInputStream = p.getInputStream();
 		Thread.sleep(3000);
 		rClient = new ConsulRegistrationClient();

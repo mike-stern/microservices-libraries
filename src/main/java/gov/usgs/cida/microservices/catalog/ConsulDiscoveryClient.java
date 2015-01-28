@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public class ConsulDiscoveryClient implements DiscoveryClient {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ConsulDiscoveryClient.class);
-	private List<Consul> clients = new ArrayList<>();
+	private final List<Consul> clients = new ArrayList<>();
 	private static final Random random = new Random();
 	
 	private void addClient(String ipAddress, int port){
@@ -41,9 +41,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	private CatalogClient getCatalogClient(){
 	    return getRandomElement(clients).catalogClient();
 	}
-	private HealthClient getHealthClient(){
-	    return getRandomElement(clients).healthClient();
-	}
+	
 	private static <T> T getRandomElement(List<T> list){
 	    int randomIndex = random.nextInt(list.size());
 	    return list.get(randomIndex);
