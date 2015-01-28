@@ -9,17 +9,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.apache.cxf.helpers.FileUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -72,11 +69,6 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	@Before
 	public void setUp() throws IOException, InterruptedException {
 		tmpDir = FileUtils.createTmpDir();
-//		String cmd = "consul agent -server -bootstrap-expect 1 -data-dir " + tmpDir.getCanonicalPath() + " -node "+ node + " -bind=" + address +" -client=" + address;
-//		logger.info("running the following command in bash:" + cmd);
-//		p = Runtime.getRuntime().exec(new String[]{"bash", "-c", cmd});
-//		consulInputStream = p.getInputStream();
-//		Thread.sleep(3000);
 		rClient = new ConsulRegistrationClient(address);
 		rClient.registerService(config);
 		dClient = new ConsulDiscoveryClient(address, 8500);
@@ -85,16 +77,6 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 
 	@After
 	public void tearDown() throws InterruptedException {
-//		try {
-//			consulInputStream.close();
-//		} catch (IOException ex) {
-//			// Meh
-//		}
-//		p.destroy();
-//		Thread.sleep(3000);
-//
-//		FileUtils.delete(tmpDir);
-//		logger.debug("deleted temp dir");
 	}
 	
 	@Test
@@ -112,8 +94,6 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		    ServiceConfig discoveredConfig = versionConfigs.iterator().next();
 		    assertTrue(discoveredConfig.equals(config));
 		}
-		
-		
 	}
 	@Test
 	public void testDiscoverServiceUris () throws URISyntaxException{
