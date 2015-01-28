@@ -14,7 +14,6 @@ public class ServiceConfigBuilder {
 	private String name = null; // required
 	private int port = 0; //required
 	private String id = null; // optional
-	private long ttl = 0; // optional;
 	private String[] tags = null; //optional
 	private String address = null; // Auto-Filled
 	private String node = null; // Auto-filled
@@ -23,12 +22,12 @@ public class ServiceConfigBuilder {
 		ServiceConfig result = new ServiceConfig();
 		
 		if (StringUtils.isBlank(name)) {
-			throw new IllegalStateException("Service name is required");
+			throw new IllegalStateException("a service name is required");
 		}
 		result.setName(name);
 		
 		if (port < 1) {
-			throw new IllegalStateException("Service port is required to be a positive integer");
+			throw new IllegalStateException("The service port is required to be a positive integer");
 		}
 		result.setPort(port);
 		
@@ -37,11 +36,6 @@ public class ServiceConfigBuilder {
 		} else {
 			result.setId(id);
 		}
-		
-		if (ttl < 0) {
-			throw new IllegalStateException("TTL needs to a positive value");
-		}
-		result.setTtl(ttl);
 		
 		if (tags == null) {
 			tags = new String[0];
@@ -54,6 +48,9 @@ public class ServiceConfigBuilder {
 		
 		if (StringUtils.isNotBlank(address)) {
 			result.setAddress(address);
+		}
+		else{
+		    throw new IllegalArgumentException("an address is required");
 		}
 		
 		logger.debug("Created new service configuration: {}", result.toString());
@@ -82,14 +79,6 @@ public class ServiceConfigBuilder {
 	 */
 	public ServiceConfigBuilder setPort(int port) {
 		this.port = port;
-		return this;
-	}
-
-	/**
-	 * @param ttl the ttl to set
-	 */
-	public ServiceConfigBuilder setTtl(long ttl) {
-		this.ttl = ttl;
 		return this;
 	}
 
