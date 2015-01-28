@@ -74,12 +74,12 @@
 			<url>https://internal.cida.usgs.gov/maven/content/repositories/cida-thirdparty/</url>
 		</repository>
 		<repository>
-		    <snapshots>
-			<enabled>false</enabled>
-		    </snapshots>
-		    <id>jcenter</id>
-		    <name>bintray</name>
-		    <url>http://jcenter.bintray.com</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>jcenter</id>
+			<name>bintray</name>
+			<url>http://jcenter.bintray.com</url>
 		</repository>
 	</repositories>
 	
@@ -163,6 +163,9 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<version>2.18.1</version>
 						<configuration>
+							<systemPropertyVariables>
+								<consulBinaryPath>${path.consul}</consulBinaryPath>
+							</systemPropertyVariables>
 							<excludes>
 								<exclude>**/*Test.java</exclude>
 							</excludes>
