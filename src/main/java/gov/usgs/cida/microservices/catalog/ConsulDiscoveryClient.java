@@ -72,6 +72,30 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	
 	/**
 	 * Creates a client that communicates with many consul nodes on different
+	 * IP addresses, but identical ports. Traffic is distributed to the nodes
+	 * randomly.
+	 * 
+	 * @param ipAddress
+	 * @param port 
+	 */
+	public ConsulDiscoveryClient(List<String> ipAddresses, int port){
+	    this(new HashSet<>(ipAddresses), port);
+	}
+	
+	/**
+	 * Creates a client that communicates with many consul nodes on different
+	 * IP addresses, but identical ports. Traffic is distributed to the nodes
+	 * randomly.
+	 * 
+	 * @param ipAddress
+	 * @param port 
+	 */
+	public ConsulDiscoveryClient(String[] ipAddresses, int port){
+	    this(Arrays.asList(ipAddresses), port);
+	}
+	
+	/**
+	 * Creates a client that communicates with many consul nodes on different
 	 * IP addresses and different ports. Traffic is distributed to the nodes
 	 * randomly.
 	 * 
