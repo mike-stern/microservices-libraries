@@ -164,7 +164,9 @@
 						<version>2.18.1</version>
 						<configuration>
 							<systemPropertyVariables>
-								<consulBinaryPath>${path.consul}</consulBinaryPath>
+								<path.consul>${path.consul}</path.consul>
+								<port.consul>${port.consul}</port.consul>
+								<address.consul>${address.consul}</address.consul>
 							</systemPropertyVariables>
 							<excludes>
 								<exclude>**/*Test.java</exclude>

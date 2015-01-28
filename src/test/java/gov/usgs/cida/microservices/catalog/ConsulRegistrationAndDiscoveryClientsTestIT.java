@@ -31,8 +31,8 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	static InputStream consulInputStream;
 	static final String name = "cida-is-awesome-super-watermelon-test-name";
 	static final String id = "cida-is-awesome-super-watermelon-test-id";
-	static final String address = "152.61.235.111"; //cida-eros-consuldev1.er.usgs.gov
-	static final int port = 8080;
+	static String address;
+	static int port;
 	static final String[] tags = new String[]{"cida-is-awesome-super-watermelon-test-tag-1", "cida-is-awesome-super-watermelon-test-tag-2"};
 	static File tmpDir;
 	static final String node = "nwissddvascnsl1.cr.usgs.gov";
@@ -44,19 +44,21 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	public static ServiceConfig config;
 	static DiscoveryClient dClient;
 	static RegistrationClient rClient;
-	
+
 	public ConsulRegistrationAndDiscoveryClientsTestIT() {
 	}
 
 	@BeforeClass
 	public static void setUpClass() throws IOException {
-	    ServiceConfigBuilder builder = new ServiceConfigBuilder();
+		address = System.getProperty("address.consul");
+		port = Integer.parseInt(System.getProperty("port.consul", "8080"));
+		ServiceConfigBuilder builder = new ServiceConfigBuilder();
 		builder.setName(name)
-		.setNode(node)
-		.setId(id)
-		.setPort(port)
-		.setAddress(address)
-		.setTags(tags);
+				.setNode(node)
+				.setId(id)
+				.setPort(port)
+				.setAddress(address)
+				.setTags(tags);
 		config = builder.build();
 
 	}
@@ -69,8 +71,8 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	@Before
 	public void setUp() throws IOException, InterruptedException {
 		tmpDir = FileUtils.createTmpDir();
-		String consulPath = System.getProperty("consulBinaryPath", "consul");
-		String cmd = consulPath + " agent -server -bootstrap-expect=1 -data-dir=" + tmpDir.getCanonicalPath() + " -node "+ node + " -bind=" + address +" -client=" + address;
+		String consulPath = System.getProperty("path.consul", "consul");
+		String cmd = consulPath + " agent -server -bootstrap-expect=1 -data-dir=" + tmpDir.getCanonicalPath() + " -node " + node + " -bind=" + address + " -client=" + address;
 		logger.info("running the following command in bash:" + cmd);
 		p = Runtime.getRuntime().exec(new String[]{"/bin/bash", "-c", cmd});
 		consulInputStream = p.getInputStream();
@@ -84,42 +86,44 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	@After
 	public void tearDown() throws InterruptedException {
 	}
-	
+
 	@Test
 	public void testDiscoverServiceConfigs() throws InterruptedException, URISyntaxException {
-		
+
 		Map<String, Map<String, Set<ServiceConfig>>> services = dClient.getServiceConfigsForAllServices();
 		Assert.assertFalse(services.isEmpty());
 		assertTrue(services.containsKey(config.getName()));
 		Map<String, Set<ServiceConfig>> serviceEntry = services.get(config.getName());
 		assertEquals(serviceEntry.keySet().size(), config.getTags().length);
-		for(String tag : config.getTags()){
-		    assertTrue(serviceEntry.containsKey(tag));
-		    Set<ServiceConfig> versionConfigs = serviceEntry.get(tag);
-		    assertEquals(1, versionConfigs.size());
-		    ServiceConfig discoveredConfig = versionConfigs.iterator().next();
-		    assertTrue(discoveredConfig.equals(config));
+		for (String tag : config.getTags()) {
+			assertTrue(serviceEntry.containsKey(tag));
+			Set<ServiceConfig> versionConfigs = serviceEntry.get(tag);
+			assertEquals(1, versionConfigs.size());
+			ServiceConfig discoveredConfig = versionConfigs.iterator().next();
+			assertTrue(discoveredConfig.equals(config));
 		}
 	}
+
 	@Test
-	public void testDiscoverServiceUris () throws URISyntaxException{
+	public void testDiscoverServiceUris() throws URISyntaxException {
 		URI expected = new URIBuilder().setHost(address).setPort(port).build();
 		Map<String, Map<String, Set<URI>>> serviceUris = dClient.getUrisForAllServices();
 		Assert.assertFalse(serviceUris.isEmpty());
 		assertTrue(serviceUris.containsKey(config.getName()));
 		Map<String, Set<URI>> serviceUriEntry = serviceUris.get(config.getName());
 		assertEquals(serviceUriEntry.keySet().size(), config.getTags().length);
-		for(String tag : config.getTags()){
-		    assertTrue(serviceUriEntry.containsKey(tag));
-		    Set<URI> versionUris = serviceUriEntry.get(tag);
-		    assertEquals(1, versionUris.size());
-		    URI discoveredUri = versionUris.iterator().next();
-		    assertEquals(expected, discoveredUri);
+		for (String tag : config.getTags()) {
+			assertTrue(serviceUriEntry.containsKey(tag));
+			Set<URI> versionUris = serviceUriEntry.get(tag);
+			assertEquals(1, versionUris.size());
+			URI discoveredUri = versionUris.iterator().next();
+			assertEquals(expected, discoveredUri);
 		}
 	}
+
 	@Test
 	public void testDeRegisterService() throws InterruptedException {
-		
+
 		rClient.deregisterService(config);
 		Thread.sleep(1000);
 		ServiceConfig svc = dClient.getServiceConfigFor(config.getName(), config.getTags()[0]);
