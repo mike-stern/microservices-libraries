@@ -9,17 +9,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.apache.cxf.helpers.FileUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -32,13 +29,13 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	private static final Logger logger = LoggerFactory.getLogger(ConsulRegistrationAndDiscoveryClientsTestIT.class);
 	static Process p;
 	static InputStream consulInputStream;
-	static final String name = "test-name";
-	static final String id = "test-id";
-	static final String address = "127.0.0.1";
+	static final String name = "cida-is-awesome-super-watermelon-test-name";
+	static final String id = "cida-is-awesome-super-watermelon-test-id";
+	static final String address = "152.61.235.111"; //cida-eros-consuldev1.er.usgs.gov
 	static final int port = 8080;
-	static final String[] tags = new String[]{"test-tag-1", "test-tag-2"};
+	static final String[] tags = new String[]{"cida-is-awesome-super-watermelon-test-tag-1", "cida-is-awesome-super-watermelon-test-tag-2"};
 	static File tmpDir;
-	static final String node = "test-node";
+	static final String node = "nwissddvascnsl1.cr.usgs.gov";
 	private static final String IPADDRESS_PATTERN
 			= "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
 			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
@@ -80,22 +77,12 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		Thread.sleep(3000);
 		rClient = new ConsulRegistrationClient();
 		rClient.registerService(config);
-		Thread.sleep(1000);
 		dClient = new ConsulDiscoveryClient(address, 8500);
+		Thread.sleep(1000);
 	}
 
 	@After
 	public void tearDown() throws InterruptedException {
-		try {
-			consulInputStream.close();
-		} catch (IOException ex) {
-			// Meh
-		}
-		p.destroy();
-		Thread.sleep(3000);
-
-		FileUtils.delete(tmpDir);
-		logger.debug("deleted temp dir");
 	}
 	
 	@Test
@@ -103,8 +90,6 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		
 		Map<String, Map<String, Set<ServiceConfig>>> services = dClient.getServiceConfigsForAllServices();
 		Assert.assertFalse(services.isEmpty());
-		//'consul' service + number of services registered before each test method = 2
-		assertEquals(2, services.keySet().size());
 		assertTrue(services.containsKey(config.getName()));
 		Map<String, Set<ServiceConfig>> serviceEntry = services.get(config.getName());
 		assertEquals(serviceEntry.keySet().size(), config.getTags().length);
@@ -115,15 +100,12 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		    ServiceConfig discoveredConfig = versionConfigs.iterator().next();
 		    assertTrue(discoveredConfig.equals(config));
 		}
-		
-		
 	}
 	@Test
 	public void testDiscoverServiceUris () throws URISyntaxException{
 		URI expected = new URIBuilder().setHost(address).setPort(port).build();
 		Map<String, Map<String, Set<URI>>> serviceUris = dClient.getUrisForAllServices();
 		Assert.assertFalse(serviceUris.isEmpty());
-		assertEquals(2, serviceUris.keySet().size());
 		assertTrue(serviceUris.containsKey(config.getName()));
 		Map<String, Set<URI>> serviceUriEntry = serviceUris.get(config.getName());
 		assertEquals(serviceUriEntry.keySet().size(), config.getTags().length);
