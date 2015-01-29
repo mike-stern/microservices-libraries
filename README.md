@@ -19,5 +19,6 @@ Example:
 mvn clean test -P microservice-integration-test \
 -Dpath.consul=/opt/tomcat/bin/consul \
 -Daddress.consul=127.0.0.1  \
--Dport.consul=98312
+-Dport.consul=98312 \
+-Dnode.consul=some-development-server.usgs.gov
 ```
