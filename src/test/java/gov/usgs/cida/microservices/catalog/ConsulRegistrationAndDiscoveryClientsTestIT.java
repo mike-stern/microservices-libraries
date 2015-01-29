@@ -1,11 +1,11 @@
 package gov.usgs.cida.microservices.catalog;
 
-import gov.usgs.cida.microservices.registration.ConsulRegistrationClient;
-import gov.usgs.cida.microservices.discovery.ConsulDiscoveryClient;
 import gov.usgs.cida.microservices.api.discovery.DiscoveryClient;
 import gov.usgs.cida.microservices.api.registration.RegistrationClient;
 import gov.usgs.cida.microservices.config.ServiceConfig;
 import gov.usgs.cida.microservices.config.ServiceConfigBuilder;
+import gov.usgs.cida.microservices.discovery.ConsulDiscoveryClient;
+import gov.usgs.cida.microservices.registration.ConsulRegistrationClient;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

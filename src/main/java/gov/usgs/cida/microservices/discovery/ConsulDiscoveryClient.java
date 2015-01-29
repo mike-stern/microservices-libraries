@@ -11,6 +11,7 @@ import gov.usgs.cida.microservices.config.ServiceConfig;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -68,7 +69,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	 * IP addresses, but identical ports. Traffic is distributed to the nodes
 	 * randomly.
 	 * 
-	 * @param ipAddress
+	 * @param ipAddresses
 	 * @param port 
 	 */
 	public ConsulDiscoveryClient(List<String> ipAddresses, int port){
@@ -80,7 +81,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	 * IP addresses, but identical ports. Traffic is distributed to the nodes
 	 * randomly.
 	 * 
-	 * @param ipAddress
+	 * @param ipAddresses
 	 * @param port 
 	 */
 	public ConsulDiscoveryClient(String[] ipAddresses, int port){
