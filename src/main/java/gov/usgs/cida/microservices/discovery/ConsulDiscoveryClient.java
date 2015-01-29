@@ -33,7 +33,8 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	private static final Logger logger = LoggerFactory.getLogger(ConsulDiscoveryClient.class);
 	private final List<Consul> clients = new ArrayList<>();
 	private static final Random random = new Random();
-	
+	public static final String CONSUL_NAME_VERSION_PATH_PREFIX = "/";
+	public final static String CONSUL_NAME_VERSION_PATH_DELIM = "-";
 	private void addClient(String ipAddress, int port){
 	    this.clients.add(Consul.newClient(ipAddress, port));
 	}
@@ -153,6 +154,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	    URIBuilder uriBuilder = new URIBuilder();
 	    uriBuilder.setHost(address);
 	    uriBuilder.setPort(port);
+	    uriBuilder.setPath(CONSUL_NAME_VERSION_PATH_PREFIX + svcConfig.getName() + CONSUL_NAME_VERSION_PATH_DELIM + svcConfig.getVersion());
 	    try {
 		uri = uriBuilder.build();
 	    } catch (URISyntaxException ex) {

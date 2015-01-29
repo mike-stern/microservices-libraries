@@ -14,7 +14,7 @@ public class ServiceConfigBuilder {
 	private String name = null; // required
 	private int port = 0; //required
 	private String id = null; // optional
-	private String[] tags = null; //optional
+	private String version = null; //optional
 	private String address = null; // Auto-Filled
 	private String node = null; // Auto-filled
 	
@@ -37,10 +37,10 @@ public class ServiceConfigBuilder {
 			result.setId(id);
 		}
 		
-		if (tags == null) {
-			tags = new String[0];
+		if (version == null) {
+			version = "";
 		}
-		result.setTags(tags);
+		result.setVersion(version);
 		
 		if (StringUtils.isNotBlank(node)) {
 			result.setNode(node);
@@ -83,10 +83,10 @@ public class ServiceConfigBuilder {
 	}
 
 	/**
-	 * @param tags the tags to set
+	 * @param version the version to set
 	 */
-	public ServiceConfigBuilder setTags(String[] tags) {
-		this.tags = tags;
+	public ServiceConfigBuilder setVersion(String version) {
+		this.version = version;
 		return this;
 	}
 

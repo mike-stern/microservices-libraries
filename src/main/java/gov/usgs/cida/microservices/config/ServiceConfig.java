@@ -20,7 +20,7 @@ public class ServiceConfig {
 	private String node; // Auto-filled
 	private String id; //optional
 	private long ttl; // optional
-	private String[] tags; //optional
+	private String version; //required
 	// TODO- private HealthCheck 
 
 	/**
@@ -96,17 +96,17 @@ public class ServiceConfig {
 
 
 	/**
-	 * @return the tags
+	 * @return the version
 	 */
-	public String[] getTags() {
-		return tags;
+	public String getVersion() {
+		return version;
 	}
 
 	/**
-	 * @param tags the tags to set
+	 * @param version the tags to set
 	 */
-	protected void setTags(String[] tags) {
-		this.tags = tags;
+	protected void setVersion(String version) {
+		this.version = version;
 	}
 
 	@Override

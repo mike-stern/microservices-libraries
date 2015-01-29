@@ -35,7 +35,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	static final String id = "cida-is-awesome-super-watermelon-test-id";
 	static String address;
 	static int port;
-	static final String[] tags = new String[]{"cida-is-awesome-super-watermelon-test-tag-1", "cida-is-awesome-super-watermelon-test-tag-2"};
+	static final String version = "cida-is-awesome-super-watermelon-test-tag-1";
 	static File tmpDir;
 	static final String node = "nwissddvascnsl1.cr.usgs.gov";
 	private static final String IPADDRESS_PATTERN
@@ -60,7 +60,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 				.setId(id)
 				.setPort(port)
 				.setAddress(address)
-				.setTags(tags);
+				.setVersion(version);
 		config = builder.build();
 
 	}
@@ -87,8 +87,18 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 
 	@After
 	public void tearDown() throws InterruptedException {
-	}
+		try {
+			consulInputStream.close();
+		} catch (IOException ex) {
+			// Meh
+		}
+		p.destroy();
+		Thread.sleep(3000);
 
+		FileUtils.delete(tmpDir);
+		logger.debug("deleted temp dir");
+	}
+	
 	@Test
 	public void testDiscoverServiceConfigs() throws InterruptedException, URISyntaxException {
 
@@ -96,41 +106,43 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		Assert.assertFalse(services.isEmpty());
 		assertTrue(services.containsKey(config.getName()));
 		Map<String, Set<ServiceConfig>> serviceEntry = services.get(config.getName());
-		assertEquals(serviceEntry.keySet().size(), config.getTags().length);
-		for (String tag : config.getTags()) {
-			assertTrue(serviceEntry.containsKey(tag));
-			Set<ServiceConfig> versionConfigs = serviceEntry.get(tag);
-			assertEquals(1, versionConfigs.size());
-			ServiceConfig discoveredConfig = versionConfigs.iterator().next();
-			assertTrue(discoveredConfig.equals(config));
-		}
+		assertEquals(1, serviceEntry.keySet().size());
+		String myVersion = config.getVersion();
+		assertTrue(serviceEntry.containsKey(myVersion));
+		Set<ServiceConfig> versionConfigs = serviceEntry.get(myVersion);
+		assertEquals(1, versionConfigs.size());
+		ServiceConfig discoveredConfig = versionConfigs.iterator().next();
+		assertTrue(discoveredConfig.equals(config));
 	}
 
 	@Test
 	public void testDiscoverServiceUris() throws URISyntaxException {
-		URI expected = new URIBuilder().setHost(address).setPort(port).build();
+		URI expected = new URIBuilder().setHost(address).setPort(port).setPath(
+			ConsulDiscoveryClient.CONSUL_NAME_VERSION_PATH_PREFIX + 
+			name + 
+			ConsulDiscoveryClient.CONSUL_NAME_VERSION_PATH_DELIM +
+			version
+		).build();
 		Map<String, Map<String, Set<URI>>> serviceUris = dClient.getUrisForAllServices();
 		Assert.assertFalse(serviceUris.isEmpty());
 		assertTrue(serviceUris.containsKey(config.getName()));
 		Map<String, Set<URI>> serviceUriEntry = serviceUris.get(config.getName());
-		assertEquals(serviceUriEntry.keySet().size(), config.getTags().length);
-		for (String tag : config.getTags()) {
-			assertTrue(serviceUriEntry.containsKey(tag));
-			Set<URI> versionUris = serviceUriEntry.get(tag);
-			assertEquals(1, versionUris.size());
-			URI discoveredUri = versionUris.iterator().next();
-			assertEquals(expected, discoveredUri);
-		}
+		assertEquals(1, serviceUriEntry.keySet().size());
+		String myVersion = config.getVersion();
+		assertTrue(serviceUriEntry.containsKey(myVersion));
+		Set<URI> versionUris = serviceUriEntry.get(myVersion);
+		assertEquals(1, versionUris.size());
+		URI discoveredUri = versionUris.iterator().next();
+		assertEquals(expected, discoveredUri);
 	}
 
 	@Test
 	public void testDeRegisterService() throws InterruptedException {
-
 		rClient.deregisterService(config);
 		Thread.sleep(1000);
-		ServiceConfig svc = dClient.getServiceConfigFor(config.getName(), config.getTags()[0]);
+		ServiceConfig svc = dClient.getServiceConfigFor(config.getName(), config.getVersion());
 		Assert.assertNull(svc);
-		URI uri = dClient.getUriFor(config.getName(), config.getTags()[0]);
+		URI uri = dClient.getUriFor(config.getName(), config.getVersion());
 		Assert.assertNull(uri);
 	}
 }
