@@ -102,7 +102,7 @@ public class ServiceConfig {
 	}
 
 	/**
-	 * @param version the tags to set
+	 * @param version the version to set
 	 */
 	protected void setVersion(String version) {
 		this.version = version;
