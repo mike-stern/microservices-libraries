@@ -24,6 +24,14 @@
 			<organizationUrl>http://cida.usgs.gov</organizationUrl>
 			<timezone>-6</timezone>
 		</developer>
+		<developer>
+			<name>Ivan Suftin</name>
+			<email>isuftin@usgs.gov</email>
+			<id>isuftin</id>
+			<organization>Center for Integrated Data Analytics</organization>
+			<organizationUrl>http://cida.usgs.gov</organizationUrl>
+			<timezone>-6</timezone>
+		</developer>
 	</developers>
 
 	<licenses>

@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Set;
 import org.apache.cxf.helpers.FileUtils;
+import org.apache.cxf.helpers.IOUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -50,7 +51,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 
 	@BeforeClass
 	public static void setUpClass() throws IOException {
-		address = System.getProperty("address.consul");
+		address = System.getProperty("address.consul", "127.0.0.1");
 		port = Integer.parseInt(System.getProperty("port.consul", "8080"));
 		ServiceConfigBuilder builder = new ServiceConfigBuilder();
 		builder.setName(name)
@@ -84,7 +85,8 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	}
 
 	@After
-	public void tearDown() throws InterruptedException {
+	public void tearDown() throws InterruptedException, IOException {
+		p.destroy();
 	}
 
 	@Test
