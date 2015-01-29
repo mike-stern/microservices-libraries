@@ -19,7 +19,6 @@ public class ServiceConfig {
 	private String address; // Auto-filled 
 	private String node; // Auto-filled
 	private String id; //optional
-	private long ttl; // optional
 	private String version; //required
 	// TODO- private HealthCheck 
 
@@ -123,6 +122,5 @@ public class ServiceConfig {
 	public boolean equals(Object obj) {
 		return EqualsBuilder.reflectionEquals(this, obj);
 	}
-
 
 }
