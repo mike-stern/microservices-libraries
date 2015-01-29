@@ -43,16 +43,15 @@ public class ConsulRegistrationClient implements RegistrationClient {
 		reg.setName(config.getName());
 		reg.setPort(config.getPort());
 		reg.setId(config.getId());
-		reg.setTags(config.getTags());
+		reg.setTags(config.getVersion());
 
 		//todo: make Check configurable
 		Registration.Check check = new Registration.Check();
-		long ttl = config.getTtl() > 0 ? config.getTtl() : DEFAULT_CONSUL_TTL;
-		check.setTtl(ttl + "s");
+		check.setTtl(DEFAULT_CONSUL_TTL + "s");
 		reg.setCheck(check);
 
 		agentClient.register(reg);
-		logger.info("Registered new service: {}({})@{}:{} with id: {}", config.getName(), config.getTags(), config.getAddress(), config.getPort(), config.getId());
+		logger.info("Registered new service: {}({})@{}:{} with id: {}", config.getName(), config.getVersion(), config.getAddress(), config.getPort(), config.getId());
 	}
 
 	@Override

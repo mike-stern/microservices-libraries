@@ -19,8 +19,7 @@ public class ServiceConfig {
 	private String address; // Auto-filled 
 	private String node; // Auto-filled
 	private String id; //optional
-	private long ttl; // optional
-	private String[] tags; //optional
+	private String version; //required
 	// TODO- private HealthCheck 
 
 	/**
@@ -96,31 +95,17 @@ public class ServiceConfig {
 
 
 	/**
-	 * @return the tags
+	 * @return the version
 	 */
-	public String[] getTags() {
-		return tags.clone();
+	public String getVersion() {
+		return version;
 	}
 
 	/**
-	 * @param tags the tags to set
+	 * @param version the version to set
 	 */
-	protected void setTags(String[] tags) {
-		this.tags = tags.clone();
-	}
-	
-		/**
-	 * @return the ttl
-	 */
-	public long getTtl() {
-		return ttl;
-	}
-
-	/**
-	 * @param ttl the ttl to set
-	 */
-	protected void setTtl(long ttl) {
-		this.ttl = ttl;
+	protected void setVersion(String version) {
+		this.version = version;
 	}
 
 	@Override

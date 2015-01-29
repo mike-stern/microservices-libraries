@@ -27,9 +27,11 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	private static final Logger logger = LoggerFactory.getLogger(ConsulDiscoveryClient.class);
 	private final List<Consul> clients = new ArrayList<>();
 	private static final Random random = new Random();
-
-	private void addClient(String ipAddress, int port) {
+	public static final String CONSUL_NAME_VERSION_PATH_PREFIX = "/";
+	public final static String CONSUL_NAME_VERSION_PATH_DELIM = "-";
+	private void addClient(String ipAddress, int port){
 		this.clients.add(Consul.newClient(ipAddress, port));
+		logger.debug("Added consul client {}:{}", ipAddress, port);
 	}
 
 	private CatalogClient getCatalogClient() {
@@ -137,6 +139,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 		CatalogClient catClient = getCatalogClient();
 		CatalogOptions catOpts;
 		catOpts = CatalogOptionsBuilder.builder().tag(version).build();
+		logger.debug("Querying Consul for service '{}' at version '{}'", serviceName, version);
 		List<CatalogService> services = catClient.getService(serviceName, catOpts).getResponse();
 		return services;
 	}
@@ -149,6 +152,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 			URIBuilder uriBuilder = new URIBuilder();
 			uriBuilder.setHost(address);
 			uriBuilder.setPort(port);
+			uriBuilder.setPath(CONSUL_NAME_VERSION_PATH_PREFIX + svcConfig.getName() + CONSUL_NAME_VERSION_PATH_DELIM + svcConfig.getVersion());
 			try {
 				uri = uriBuilder.build();
 			} catch (URISyntaxException ex) {
@@ -168,7 +172,9 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	@Override
 	public Map<String, Map<String, Set<ServiceConfig>>> getServiceConfigsForAllServices() {
 		CatalogClient catClient = getCatalogClient();
+		logger.debug("Querying Consul for all services");
 		Map<String, List<String>> serviceToTags = catClient.getServices().getResponse();
+		logger.debug("Processing response from Consul");
 		Map<String, Map<String, Set<ServiceConfig>>> returnMap = new HashMap<>();
 		for (Map.Entry<String, List<String>> entry : serviceToTags.entrySet()) {
 			List<String> tags = entry.getValue();
@@ -176,7 +182,6 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 			Map<String, Set<ServiceConfig>> serviceSpecificMap = new HashMap<>();
 			for (String tag : tags) {
 				Set<ServiceConfig> nameAndTagSpecificConfigs = getServiceConfigsFor(serviceName, tag);
-
 				serviceSpecificMap.put(tag, nameAndTagSpecificConfigs);
 			}
 			returnMap.put(serviceName, serviceSpecificMap);

@@ -21,7 +21,7 @@ public class ServiceConfigBuilderTest {
 	String id = "Test ID";
 	String address = "127.0.0.1";
 	int port = 8080;
-	String[] tags = new String[]{"test-tag-1", "test-tag-2"};
+	String version = "test-tag-1";
 
 	@Test
 	public void testBuildWithAllParams() {
@@ -32,10 +32,10 @@ public class ServiceConfigBuilderTest {
 		.setId(id)
 		.setPort(port)
 		.setAddress(address)
-		.setTags(tags);
+		.setVersion(version);
 		ServiceConfig result = instance.build();
 		assertNotNull(result);
-		Assert.assertArrayEquals(result.getTags(), tags);
+		assertEquals(result.getVersion(), version);
 		assertEquals(result.getName(), name);
 		assertEquals(result.getId(), id);
 		assertEquals(result.getPort(), port);
@@ -48,7 +48,7 @@ public class ServiceConfigBuilderTest {
 		instance.setName(name)
 		.setId(id)
 		.setPort(port)
-		.setTags(tags);
+		.setVersion(version);
 		instance.build();
 	}
 	
@@ -60,7 +60,7 @@ public class ServiceConfigBuilderTest {
 		instance.setId(id)
 		.setAddress(address)
 		.setPort(port)
-		.setTags(tags);
+		.setVersion(version);
 		instance.build(); // Should hit error here
 	}
 	
@@ -73,7 +73,7 @@ public class ServiceConfigBuilderTest {
 		.setAddress(address)
 		.setId(id)
 		.setPort(0)
-		.setTags(tags);
+		.setVersion(version);
 		instance.build(); // Should hit error here
 	}
 
@@ -85,10 +85,10 @@ public class ServiceConfigBuilderTest {
 		instance.setName(name)
 		.setAddress(address)
 		.setPort(port)
-		.setTags(tags);
+		.setVersion(version);
 		ServiceConfig result = instance.build();
 		assertNotNull(result);
-		Assert.assertArrayEquals(result.getTags(), tags);
+		assertEquals(result.getVersion(), version);
 		assertEquals(result.getName(), name);
 		assertNotEquals(result.getId(), id);
 		assertEquals(result.getPort(), port);
@@ -103,10 +103,10 @@ public class ServiceConfigBuilderTest {
 		.setAddress(address)
 		.setId(id)
 		.setPort(port)
-		.setTags(tags);
+		.setVersion(version);
 		ServiceConfig result = instance.build();
 		assertNotNull(result);
-		Assert.assertArrayEquals(result.getTags(), tags);
+		assertEquals(result.getVersion(), version);
 		assertEquals(result.getName(), name);
 		assertEquals(result.getId(), id);
 		assertEquals(result.getPort(), port);

@@ -11,7 +11,7 @@ public class ConsulCatalogServiceConfigBuilder extends ServiceConfigBuilder{
 		.setName(catService.getServiceName())
 		.setNode(catService.getNode())
 		.setPort(catService.getServicePort())
-		.setTags(catService.getServiceTags().toArray(new String[0]));		
+		.setVersion(catService.getServiceTags().get(0));
     }
     
 }
