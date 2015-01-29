@@ -175,6 +175,7 @@
 								<path.consul>${path.consul}</path.consul>
 								<port.consul>${port.consul}</port.consul>
 								<address.consul>${address.consul}</address.consul>
+								<node.consul>${node.consul}</node.consul>
 							</systemPropertyVariables>
 							<excludes>
 								<exclude>**/*Test.java</exclude>

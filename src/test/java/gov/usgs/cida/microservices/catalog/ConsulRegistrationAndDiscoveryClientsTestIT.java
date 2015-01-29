@@ -11,8 +11,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.helpers.FileUtils;
-import org.apache.cxf.helpers.IOUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -36,7 +36,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	static int port;
 	static final String[] tags = new String[]{"cida-is-awesome-super-watermelon-test-tag-1", "cida-is-awesome-super-watermelon-test-tag-2"};
 	static File tmpDir;
-	static final String node = "nwissddvascnsl1.cr.usgs.gov";
+	static String node;
 	private static final String IPADDRESS_PATTERN
 			= "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
 			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
@@ -51,8 +51,14 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 
 	@BeforeClass
 	public static void setUpClass() throws IOException {
-		address = System.getProperty("address.consul", "127.0.0.1");
-		port = Integer.parseInt(System.getProperty("port.consul", "8080"));
+		String addressProperty = System.getProperty("address.consul");
+		String portProperty = System.getProperty("port.consul");
+		String nodeProperty = System.getProperty("node.consul");
+		
+		address = StringUtils.isNotBlank(addressProperty) ? addressProperty : "127.0.0.1";
+		port = Integer.parseInt(StringUtils.isNotBlank(portProperty) ? portProperty : "8085");
+		node = StringUtils.isNotBlank(nodeProperty) ? nodeProperty : "development-server.usgs.gov";
+		
 		ServiceConfigBuilder builder = new ServiceConfigBuilder();
 		builder.setName(name)
 				.setNode(node)
@@ -61,12 +67,11 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 				.setAddress(address)
 				.setTags(tags);
 		config = builder.build();
-
 	}
 
 	@AfterClass
 	public static void tearDownClass() {
-
+		p.destroyForcibly();
 	}
 
 	@Before
