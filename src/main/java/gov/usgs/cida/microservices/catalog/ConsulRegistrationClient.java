@@ -5,7 +5,6 @@ import com.orbitz.consul.Consul;
 import com.orbitz.consul.model.agent.Registration;
 import gov.usgs.cida.microservices.api.registration.RegistrationClient;
 import gov.usgs.cida.microservices.config.ServiceConfig;
-import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +21,12 @@ public class ConsulRegistrationClient implements RegistrationClient {
 		this(DEFAULT_CONSUL_ADDRESS, DEFAULT_CONSUL_PORT);
 	}
 
-	public ConsulRegistrationClient(int consulPort) {
-		this(DEFAULT_CONSUL_ADDRESS, consulPort);
-	}
-
 	public ConsulRegistrationClient(String consulAddress) {
 		this(consulAddress, DEFAULT_CONSUL_PORT);
+	}
+
+	public ConsulRegistrationClient(int consulPort) {
+		this(DEFAULT_CONSUL_ADDRESS, consulPort);
 	}
 
 	public ConsulRegistrationClient(String consulAddress, int consulPort) {
@@ -36,16 +35,6 @@ public class ConsulRegistrationClient implements RegistrationClient {
 
 	@Override
 	public void registerService(ServiceConfig config) {
-		registerService(config, DEFAULT_CONSUL_PORT);
-	}
-
-	/**
-	 *
-	 * @param config
-	 * @param consulPort the port on which the consul http api listens --
-	 * distinct from the service's port
-	 */
-	public void registerService(ServiceConfig config, int consulPort) {
 		if (config == null) {
 			throw new NullPointerException("Configuration may not be null");
 		}
@@ -58,7 +47,8 @@ public class ConsulRegistrationClient implements RegistrationClient {
 
 		//todo: make Check configurable
 		Registration.Check check = new Registration.Check();
-		check.setTtl(DEFAULT_CONSUL_TTL + "s");
+		long ttl = config.getTtl() > 0 ? config.getTtl() : DEFAULT_CONSUL_TTL;
+		check.setTtl(ttl + "s");
 		reg.setCheck(check);
 
 		agentClient.register(reg);
