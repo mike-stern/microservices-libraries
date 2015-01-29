@@ -1,4 +1,4 @@
-package gov.usgs.cida.microservices.catalog;
+package gov.usgs.cida.microservices.discovery;
 
 import com.orbitz.consul.AgentClient;
 import com.orbitz.consul.CatalogClient;
