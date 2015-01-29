@@ -1,4 +1,4 @@
-package gov.usgs.cida.microservices.catalog;
+package gov.usgs.cida.microservices.discovery;
 
 import com.orbitz.consul.AgentClient;
 import com.orbitz.consul.CatalogClient;
@@ -68,6 +68,30 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	    for(String ipAddress : ipAddresses){
 		addClient(ipAddress, port);
 	    }
+	}
+	
+	/**
+	 * Creates a client that communicates with many consul nodes on different
+	 * IP addresses, but identical ports. Traffic is distributed to the nodes
+	 * randomly.
+	 * 
+	 * @param ipAddress
+	 * @param port 
+	 */
+	public ConsulDiscoveryClient(List<String> ipAddresses, int port){
+	    this(new HashSet<>(ipAddresses), port);
+	}
+	
+	/**
+	 * Creates a client that communicates with many consul nodes on different
+	 * IP addresses, but identical ports. Traffic is distributed to the nodes
+	 * randomly.
+	 * 
+	 * @param ipAddress
+	 * @param port 
+	 */
+	public ConsulDiscoveryClient(String[] ipAddresses, int port){
+	    this(Arrays.asList(ipAddresses), port);
 	}
 	
 	/**
