@@ -1,11 +1,11 @@
 package gov.usgs.cida.microservices.catalog;
 
-import gov.usgs.cida.microservices.registration.ConsulRegistrationClient;
-import gov.usgs.cida.microservices.discovery.ConsulDiscoveryClient;
 import gov.usgs.cida.microservices.api.discovery.DiscoveryClient;
 import gov.usgs.cida.microservices.api.registration.RegistrationClient;
 import gov.usgs.cida.microservices.config.ServiceConfig;
 import gov.usgs.cida.microservices.config.ServiceConfigBuilder;
+import gov.usgs.cida.microservices.discovery.ConsulDiscoveryClient;
+import gov.usgs.cida.microservices.registration.ConsulRegistrationClient;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,23 +30,18 @@ import org.slf4j.LoggerFactory;
 public class ConsulRegistrationAndDiscoveryClientsTestIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConsulRegistrationAndDiscoveryClientsTestIT.class);
-	static Process p;
-	static InputStream consulInputStream;
-	static final String name = "cida-is-awesome-super-watermelon-test-name";
-	static final String id = "cida-is-awesome-super-watermelon-test-id";
-	static String address;
-	static int port;
-	static final String[] tags = new String[]{"cida-is-awesome-super-watermelon-test-tag-1", "cida-is-awesome-super-watermelon-test-tag-2"};
-	static File tmpDir;
-	static String node;
-	private static final String IPADDRESS_PATTERN
-			= "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
-			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
-			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
-			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
-	public static ServiceConfig config;
-	static DiscoveryClient dClient;
-	static RegistrationClient rClient;
+	private static Process p;
+	private static InputStream consulInputStream;
+	private static final String name = "cida-is-awesome-super-watermelon-test-name";
+	private static final String id = "cida-is-awesome-super-watermelon-test-id";
+	private static String address;
+	private static int port;
+	private static final String[] tags = new String[]{"cida-is-awesome-super-watermelon-test-tag-1", "cida-is-awesome-super-watermelon-test-tag-2"};
+	private static File tmpDir;
+	private static String node;
+	private static ServiceConfig config;
+	private static DiscoveryClient dClient;
+	private static RegistrationClient rClient;
 
 	public ConsulRegistrationAndDiscoveryClientsTestIT() {
 	}

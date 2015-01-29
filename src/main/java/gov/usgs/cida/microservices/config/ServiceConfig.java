@@ -99,14 +99,28 @@ public class ServiceConfig {
 	 * @return the tags
 	 */
 	public String[] getTags() {
-		return tags;
+		return tags.clone();
 	}
 
 	/**
 	 * @param tags the tags to set
 	 */
 	protected void setTags(String[] tags) {
-		this.tags = tags;
+		this.tags = tags.clone();
+	}
+	
+		/**
+	 * @return the ttl
+	 */
+	public long getTtl() {
+		return ttl;
+	}
+
+	/**
+	 * @param ttl the ttl to set
+	 */
+	protected void setTtl(long ttl) {
+		this.ttl = ttl;
 	}
 
 	@Override
@@ -123,6 +137,5 @@ public class ServiceConfig {
 	public boolean equals(Object obj) {
 		return EqualsBuilder.reflectionEquals(this, obj);
 	}
-
 
 }
