@@ -103,7 +103,6 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	
 	@Test
 	public void testDiscoverServiceConfigs() throws InterruptedException, URISyntaxException {
-
 		Map<String, Map<String, Set<ServiceConfig>>> services = dClient.getServiceConfigsForAllServices();
 		Assert.assertFalse(services.isEmpty());
 		assertTrue(services.containsKey(config.getName()));
