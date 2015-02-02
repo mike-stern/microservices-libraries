@@ -75,6 +75,8 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 	@Before
 	public void setUp() throws IOException, InterruptedException {
 		tmpDir = FileUtils.createTmpDir();
+		tmpDir.deleteOnExit();
+		
 		String consulPath = System.getProperty("path.consul", "consul");
 		String cmd = consulPath + " agent -server -bootstrap-expect=1 -data-dir=" + tmpDir.getCanonicalPath() + " -node " + node + " -bind=" + address + " -client=" + address;
 		logger.info("running the following command in bash:" + cmd);
@@ -97,7 +99,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		p.destroy();
 		Thread.sleep(3000);
 
-		FileUtils.delete(tmpDir);
+		FileUtils.removeDir(tmpDir);
 		logger.debug("deleted temp dir");
 	}
 	
