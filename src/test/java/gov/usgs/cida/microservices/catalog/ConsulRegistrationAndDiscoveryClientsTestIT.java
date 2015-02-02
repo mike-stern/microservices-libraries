@@ -97,7 +97,7 @@ public class ConsulRegistrationAndDiscoveryClientsTestIT {
 		p.destroy();
 		Thread.sleep(3000);
 
-		FileUtils.delete(tmpDir);
+		FileUtils.removeDir(tmpDir);
 		logger.debug("deleted temp dir");
 	}
 	
