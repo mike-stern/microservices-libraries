@@ -209,7 +209,7 @@
 						<id>validate</id>
 						<phase>validate</phase>
 						<configuration>
-							<configLocation>https://raw.githubusercontent.com/checkstyle/checkstyle/master/contrib/examples/checks/all-checkstyle-checks.xml</configLocation>
+							<configLocation>https://raw.githubusercontent.com/USGS-CIDA/checkstyle/v.0.1.0/sun_checks.xml</configLocation>
 							<encoding>UTF-8</encoding>
 							<consoleOutput>true</consoleOutput>
 							<failsOnError>false</failsOnError>
