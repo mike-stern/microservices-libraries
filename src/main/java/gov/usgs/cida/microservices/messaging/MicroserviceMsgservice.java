@@ -1,11 +1,10 @@
 package gov.usgs.cida.microservices.messaging;
 
-import gov.usgs.cida.microservices.api.messaging.MicroserviceHandler;
 import com.google.gson.Gson;
-import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.AMQP;
+import gov.usgs.cida.microservices.api.messaging.MicroserviceHandler;
 import com.rabbitmq.client.AMQP.Queue.DeclareOk;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import net.jodah.lyra.Connections;
@@ -21,6 +20,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Consumer;
 import java.io.Closeable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
@@ -109,6 +109,7 @@ public final class MicroserviceMsgservice implements Closeable {
 		factory.setHost(this.host);
 		factory.setUsername(this.username);
 		factory.setPassword(this.password);
+		factory.setExceptionHandler(new MicroserviceExceptionHandler());
 
 		this.conFactory = factory;
 		log.debug("initialized ConnectionFactory");
@@ -136,11 +137,16 @@ public final class MicroserviceMsgservice implements Closeable {
 			if (null != queueName) {
 				try {
 					MicroserviceHandler bindingHandler = clazz.newInstance();
+					Channel bindingChannel = getChannel();
+					Map<String, Object> defaultBinding = new HashMap<>();
+					defaultBinding.put("x-match", "all");
+					defaultBinding.put("msrvServiceName", this.serviceName);
+					defaultBinding.put("msrvHandlerType", bindingHandler.getClass().getSimpleName());
+					bindingChannel.queueBind(queueName, this.exchange, "", defaultBinding);
 					for (Map<String, Object> bindingOptions : bindingHandler.getBindings(serviceName)) {
-						Channel channel = getChannel();
-						channel.queueBind(queueName, this.exchange, "", bindingOptions);
-						channel.close();
+						bindingChannel.queueBind(queueName, this.exchange, "", bindingOptions);
 					}
+					bindingChannel.close();
 
 					int numberOfConsumers = 3;
 					for (int i = 0; i < numberOfConsumers; i++) {
@@ -157,12 +163,12 @@ public final class MicroserviceMsgservice implements Closeable {
 			}
 		}
 
-		log.debug("instantiated data syncronizer msg service");
+		log.debug("instantiated msg service");
 	}
 
 	public Channel getChannel() throws IOException {
 		Channel channel = conn.createChannel();
-		log.info("init Channel {} of {}", channel.getChannelNumber(), conn.getChannelMax());
+		log.trace("init Channel {} of {}", channel.getChannelNumber(), conn.getChannelMax());
 		return channel;
 	}
 
@@ -171,20 +177,49 @@ public final class MicroserviceMsgservice implements Closeable {
 		log.info("Cleaning Up Message Service");
 		this.conn.close(3000);
 	}
-
-//	public void sendDataSynced(String authToken, String requestId, String reportType, String stagedDataUrl) throws IOException {
-//		Map<String, String> paramsToSend = new HashMap<>();
-//		paramsToSend.put("requestId", requestId);
-//		paramsToSend.put("authToken", authToken);
-//		paramsToSend.put("reportType", reportType);
-//		paramsToSend.put("stagedDataUrl", stagedDataUrl);
-//
-//		String message = new Gson().toJson(paramsToSend, Map.class);
-//
-//		Channel channel = getChannel();
-//		Map<String, Object> headers = new HashMap<>();
-//		BasicProperties props = new BasicProperties.Builder().headers(headers).build();
-//		channel.basicPublish(exchangeName, "", props, message.getBytes());
-//		log.debug("Sent {} for request {}", "dead letter", requestId);
-//	}
+	
+	public String getServiceName() {
+		return this.serviceName;
+	}
+	
+	public void sendMessage(Map<String, Object> headers, String message) {
+		log.info("Sending Message");
+		Channel channel = null;
+		try {
+			channel = getChannel();
+			
+			Map<String, Object> modHeaders = new HashMap<>();
+			if (null != headers) {
+				modHeaders.putAll(headers);
+			}
+			iffPut(modHeaders, "msrvLoggable", Boolean.TRUE);
+			iffPut(modHeaders, "msrvPublishedBy", this.getServiceName());
+			log.trace("Sending Message {} with Headers {}", message, new Gson().toJson(modHeaders, Map.class));
+			AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
+				.headers(modHeaders)
+				.build();
+			channel.basicPublish(exchange, "", props, message.getBytes());
+		} catch (Exception e) {
+			log.error("Could not send message {}", message);
+		} finally {
+			try {
+				if (null != channel) {
+					channel.close();
+				}
+			} catch (Exception e) {
+				log.error("Could not close sending channel");
+			}
+		}
+	}
+	
+	private static boolean iffPut(Map<String, Object> headers, String key, Object val) {
+		boolean result = false;
+		if (null != headers && null != key) {
+			if (!headers.containsKey(key)) {
+				headers.put(key, val);
+				result = true;
+			}
+		}
+		return result;
+	}
 }

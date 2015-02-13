@@ -30,18 +30,25 @@ public class MicroserviceConsumer extends DefaultConsumer  {
 	}
 
 	@Override
-	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
+		log.info("Handling Delivery");
 		long deliveryTag = envelope.getDeliveryTag();
 		boolean isRedeliver = envelope.isRedeliver();
-		log.trace("Received message {}, isRedeliver: {}", deliveryTag, isRedeliver);
+		log.trace("Consumer {} on Channel {} received message {}, isRedeliver: {}", 
+				this.getClass().getSimpleName(), this.channel.getChannelNumber(), deliveryTag, isRedeliver);
 		
 		String message = StringUtils.toEncodedString(body, Charset.forName("utf-8"));
 		log.trace(message);
 		
 		Map<String, String> params = new Gson().fromJson(message, Map.class);
 		
-		this.handler.handle(params);
+		try {
+			this.handler.handle(params);
 
-		channel.basicAck(deliveryTag, false);
+			//TODO turn off autoack?
+//			channel.basicAck(deliveryTag, false);
+		} catch (Exception e) {
+			log.error("handleDelivery", e);
+		}
 	}
 }
