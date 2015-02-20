@@ -75,7 +75,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	 * @param port 
 	 */
 	public ConsulDiscoveryClient(List<String> ipAddresses, int port){
-	    this(new HashSet<>(ipAddresses), port);
+		this(new HashSet<>(ipAddresses), port);
 	}
 	
 	/**
@@ -87,7 +87,7 @@ public class ConsulDiscoveryClient implements DiscoveryClient {
 	 * @param port 
 	 */
 	public ConsulDiscoveryClient(String[] ipAddresses, int port){
-	    this(Arrays.asList(ipAddresses), port);
+		this(Arrays.asList(ipAddresses), port);
 	}
 	
 	/**
