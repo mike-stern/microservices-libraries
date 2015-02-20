@@ -50,7 +50,7 @@ public class ServiceConfigBuilder {
 			result.setAddress(address);
 		}
 		else{
-		    throw new IllegalArgumentException("an address is required");
+			throw new IllegalArgumentException("an address is required");
 		}
 		
 		logger.debug("Created new service configuration: {}", result.toString());
