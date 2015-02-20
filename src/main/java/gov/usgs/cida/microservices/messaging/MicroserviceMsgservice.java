@@ -2,8 +2,11 @@ package gov.usgs.cida.microservices.messaging;
 
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
+
 import gov.usgs.cida.microservices.api.messaging.MicroserviceHandler;
+
 import com.rabbitmq.client.AMQP.Queue.DeclareOk;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -18,10 +21,16 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Consumer;
+
 import java.io.Closeable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -32,6 +41,10 @@ public final class MicroserviceMsgservice implements Closeable {
 
 	private static final Logger log = LoggerFactory.getLogger(MicroserviceMsgservice.class);
 
+	public final static String MQ_HOST_JNDI_NAME = "messaging.service.host";
+	public final static String MQ_USER_JNDI_NAME = "messaging.service.user";
+	public final static String MQ_PASS_JNDI_NAME = "messaging.service.password";
+	
 	private final String host;
 	private final String exchange;
 	private final String username;
@@ -95,8 +108,19 @@ public final class MicroserviceMsgservice implements Closeable {
 		return result;
 	}
 	
+	private static String getJNDIValue(String var) {
+		String result;
+		try {
+			Context ctx = new InitialContext();
+			result =  (String) ctx.lookup("java:comp/env/" + var);
+		} catch (NamingException ex) {
+			result = "";
+		}
+		return result;
+	}
+	
 	public MicroserviceMsgservice() throws IOException {
-		this("localhost", "amq.headers", "guest", "guest");
+		this(getJNDIValue(MQ_HOST_JNDI_NAME), "amq.headers", getJNDIValue(MQ_USER_JNDI_NAME), getJNDIValue(MQ_PASS_JNDI_NAME));
 	}
 
 	public MicroserviceMsgservice(String host, String exchange, String username, String password) throws IOException {
