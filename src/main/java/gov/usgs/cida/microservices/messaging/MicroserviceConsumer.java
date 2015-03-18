@@ -31,7 +31,7 @@ public class MicroserviceConsumer extends DefaultConsumer  {
 
 	@Override
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
-		log.info("Handling Delivery");
+		log.trace("Handling Delivery");
 		long deliveryTag = envelope.getDeliveryTag();
 		boolean isRedeliver = envelope.isRedeliver();
 		log.trace("Consumer {} on Channel {} received message {}, isRedeliver: {}", 
