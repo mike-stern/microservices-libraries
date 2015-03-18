@@ -207,7 +207,6 @@ public final class MicroserviceMsgservice implements Closeable {
 	}
 	
 	public void sendMessage(Map<String, Object> headers, String message) {
-		log.info("Sending Message");
 		Channel channel = null;
 		try {
 			channel = getChannel();
