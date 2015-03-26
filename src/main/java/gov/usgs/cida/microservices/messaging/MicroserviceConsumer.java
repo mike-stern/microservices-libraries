@@ -6,10 +6,7 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +34,10 @@ public class MicroserviceConsumer extends DefaultConsumer  {
 		log.trace("Consumer {} on Channel {} received message {}, isRedeliver: {}", 
 				this.getClass().getSimpleName(), this.channel.getChannelNumber(), deliveryTag, isRedeliver);
 		
-		String message = StringUtils.toEncodedString(body, Charset.forName("utf-8"));
-		log.trace(message);
-		
-		Map<String, String> params = new Gson().fromJson(message, Map.class);
+		log.trace("Message headers: {}", new Gson().toJson(properties.getHeaders(), Map.class));
 		
 		try {
-			this.handler.handle(params);
+			this.handler.handle(properties.getHeaders(), body);
 
 			//TODO turn off autoack?
 //			channel.basicAck(deliveryTag, false);

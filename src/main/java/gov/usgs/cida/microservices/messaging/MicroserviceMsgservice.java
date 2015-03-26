@@ -206,7 +206,7 @@ public final class MicroserviceMsgservice implements Closeable {
 		return this.serviceName;
 	}
 	
-	public void sendMessage(Map<String, Object> headers, String message) {
+	public void sendMessage(Map<String, Object> headers, byte[] message) {
 		Channel channel = null;
 		try {
 			channel = getChannel();
@@ -217,11 +217,11 @@ public final class MicroserviceMsgservice implements Closeable {
 			}
 			iffPut(modHeaders, "msrvLoggable", Boolean.TRUE);
 			iffPut(modHeaders, "msrvPublishedBy", this.getServiceName());
-			log.trace("Sending Message {} with Headers {}", message, new Gson().toJson(modHeaders, Map.class));
+			log.trace("Sending message with Headers {}", message, new Gson().toJson(modHeaders, Map.class));
 			AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
 				.headers(modHeaders)
 				.build();
-			channel.basicPublish(exchange, "", props, message.getBytes());
+			channel.basicPublish(exchange, "", props, message);
 		} catch (Exception e) {
 			log.error("Could not send message {}", message);
 		} finally {
