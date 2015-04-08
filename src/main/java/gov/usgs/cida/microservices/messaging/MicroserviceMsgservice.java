@@ -65,7 +65,7 @@ public final class MicroserviceMsgservice implements Closeable, MessagingClient 
 	public static String SERVICE_NAME = null;
 	public static Set<Class<? extends MicroserviceHandler>> HANDLERS = Collections.EMPTY_SET;
 	
-	public static final String ERROR_QUEUE_NAME = "aqcu-errors";
+	public static final String ERROR_QUEUE_NAME = "microservice-errors";
 
 	public static String setServiceName(String name) {
 		if (StringUtils.isBlank(SERVICE_NAME)) {
