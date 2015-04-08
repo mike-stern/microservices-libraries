@@ -297,7 +297,7 @@ public final class MicroserviceMsgservice implements Closeable, MessagingClient 
 	}
 	
 	@Override
-	public void sendMessage(Map<String, Object> headers, byte[] message) {
+	public void sendMessage(String requestId, String serviceRequestId, Map<String, Object> headers, byte[] message) {
 		Channel channel = null;
 		try {
 			channel = getChannel();
@@ -306,6 +306,8 @@ public final class MicroserviceMsgservice implements Closeable, MessagingClient 
 			if (null != headers) {
 				modHeaders.putAll(headers);
 			}
+			iffPut(modHeaders, "requestId", requestId);
+			iffPut(modHeaders, "serviceRequestId", serviceRequestId);
 			iffPut(modHeaders, "msrvLoggable", Boolean.TRUE);
 			iffPut(modHeaders, "msrvPublishedBy", this.getServiceName());
 			log.trace("Sending message with Headers {}", new Gson().toJson(modHeaders, Map.class));
