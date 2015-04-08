@@ -6,10 +6,16 @@ public interface MessagingClient {
 	
 	/**
 	 * 
-	 * 
-	 * @param topic
-	 * @param requestId
+	 * @param headers
 	 * @param message
 	 */
-	public void sendMessage(String topic, String requestId, Map<String, String> message);
+	public void sendMessage(Map<String, Object> headers, byte[] message);
+	
+	/**
+	 * 
+	 * @param requestId
+	 * @param serviceRequestId
+	 * @param e
+	 */
+	public void postError(String requestId, String serviceRequestId, Exception e);
 }

@@ -3,7 +3,10 @@ package gov.usgs.cida.microservices.messaging;
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 
+import gov.usgs.cida.microservices.api.messaging.MessagingClient;
+import gov.usgs.cida.microservices.api.messaging.MicroserviceErrorHandler;
 import gov.usgs.cida.microservices.api.messaging.MicroserviceHandler;
+import gov.usgs.cida.microservices.util.MessageUtils;
 
 import com.rabbitmq.client.AMQP.Queue.DeclareOk;
 
@@ -23,8 +26,10 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Consumer;
 
 import java.io.Closeable;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Set;
 
 import javax.naming.Context;
@@ -37,7 +42,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author thongsav
  */
-public final class MicroserviceMsgservice implements Closeable {
+public final class MicroserviceMsgservice implements Closeable, MessagingClient {
 
 	private static final Logger log = LoggerFactory.getLogger(MicroserviceMsgservice.class);
 
@@ -59,6 +64,8 @@ public final class MicroserviceMsgservice implements Closeable {
 	public static MicroserviceMsgservice INSTANCE = null;
 	public static String SERVICE_NAME = null;
 	public static Set<Class<? extends MicroserviceHandler>> HANDLERS = Collections.EMPTY_SET;
+	
+	public static final String ERROR_QUEUE_NAME = "aqcu-errors";
 
 	public static String setServiceName(String name) {
 		if (StringUtils.isBlank(SERVICE_NAME)) {
@@ -177,7 +184,7 @@ public final class MicroserviceMsgservice implements Closeable {
 						//new instances just in case someone makes a non-threadsafe handler
 						MicroserviceHandler handler = clazz.newInstance();
 						Channel channel = getChannel();
-						Consumer consumer = new MicroserviceConsumer(channel, handler);
+						Consumer consumer = new MicroserviceConsumer(channel, handler, this);
 						channel.basicConsume(queueName, true, consumer);
 						log.info("Channel {} now listening for {} messages, handled by {}", channel.getChannelNumber(), queueName, clazz.getSimpleName());
 					}
@@ -188,6 +195,89 @@ public final class MicroserviceMsgservice implements Closeable {
 		}
 
 		log.debug("instantiated msg service");
+	}
+	
+	/**
+	 * TODO
+	 * @param requestId
+	 * @param serviceRequestId
+	 * @param exceptionClass
+	 * @param errorHandlerClass
+	 */
+	public void registerErrorHandler(String requestId, String serviceRequestId, Class<? extends Exception> exceptionClass, Class<? extends MicroserviceErrorHandler> errorHandlerClass) {
+		if(requestId == null && serviceRequestId == null) {
+			throw new RuntimeException("Error handlers must be tied to a request id");
+		}
+		
+		String exceptionType = null;
+		String queueName = null;
+		try {
+			Channel channel = getChannel();
+			DeclareOk ack = channel.queueDeclare(ERROR_QUEUE_NAME, false, false, false, null);
+			queueName = ack.getQueue();
+			channel.close();
+		} catch (Exception e) {
+			log.error("Could not declare error queue", e);
+		}
+		if (null != queueName) {
+			try {
+				Channel bindingChannel = getChannel();
+				MicroserviceHandler errorHandler = getWrappedErrorHandlerInstance(requestId, serviceRequestId, exceptionType, errorHandlerClass);
+				
+				for (Map<String, Object> bindingOptions : errorHandler.getBindings(serviceName)) {
+					bindingChannel.queueBind(queueName, this.exchange, "", bindingOptions);
+				}
+				bindingChannel.close();
+
+				Channel channel = getChannel();
+				Consumer consumer = new MicroserviceConsumer(channel, errorHandler, this);
+				channel.basicConsume(queueName, true, consumer);
+				log.info("Channel {} is listening for errors for requestId {}, serviceRequestId {}, and/or errorType {}", channel.getChannelNumber(), requestId, serviceRequestId, exceptionType);
+				
+				//TODO do we have to clean up the number of consumers that might be orphaned since requests are transient?
+			} catch (Exception e) {
+				log.error("Could not register error consumers", e);
+			}
+		}
+	}
+	
+	public MicroserviceHandler getWrappedErrorHandlerInstance(final String requestId, final String serviceRequestId, final String exceptionClass, Class<? extends MicroserviceErrorHandler> errorHandlerClass) throws InstantiationException, IllegalAccessException {
+		final MicroserviceErrorHandler errorHandler = errorHandlerClass.newInstance();
+		return new MicroserviceHandler() {
+			@Override
+			public void handle(Map<String, Object> params, byte[] body)
+					throws IOException {
+				errorHandler.handleError(
+						MessageUtils.getStringFromHeaders(params, "requestId"),
+						MessageUtils.getStringFromHeaders(params, "serviceRequestId"),
+						MessageUtils.getStringFromHeaders(params, "errorType"),
+						StringUtils.toEncodedString(body, Charset.forName("utf-8")));
+			}
+
+			@Override
+			public Iterable<Map<String, Object>> getBindings(String serviceName) {
+				LinkedList<Map<String,Object>> result = new LinkedList<>();
+
+				Map<String, Object> errorBindings = new HashMap<>();
+				
+				errorBindings.put("x-match", "all");
+				errorBindings.put("error", "error");
+				
+				if(requestId != null) {
+					errorBindings.put("requestId", requestId);
+				}
+				if(serviceRequestId != null) {
+					errorBindings.put("serviceRequestId", serviceRequestId);
+				}
+				if(exceptionClass != null) {
+					errorBindings.put("errorType", exceptionClass);
+				}
+				
+				result.add(errorBindings);
+				
+				return result;
+			}
+		};
 	}
 
 	public Channel getChannel() throws IOException {
@@ -206,6 +296,7 @@ public final class MicroserviceMsgservice implements Closeable {
 		return this.serviceName;
 	}
 	
+	@Override
 	public void sendMessage(Map<String, Object> headers, byte[] message) {
 		Channel channel = null;
 		try {
@@ -217,7 +308,7 @@ public final class MicroserviceMsgservice implements Closeable {
 			}
 			iffPut(modHeaders, "msrvLoggable", Boolean.TRUE);
 			iffPut(modHeaders, "msrvPublishedBy", this.getServiceName());
-			log.trace("Sending message with Headers {}", message, new Gson().toJson(modHeaders, Map.class));
+			log.trace("Sending message with Headers {}", new Gson().toJson(modHeaders, Map.class));
 			AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
 				.headers(modHeaders)
 				.build();
@@ -244,5 +335,38 @@ public final class MicroserviceMsgservice implements Closeable {
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public void postError(String requestId, String serviceRequestId, Exception sourceException) {
+		Channel channel = null;
+		try {
+			channel = getChannel();
+			
+			String errorMessage = sourceException.getMessage();
+			
+			Map<String, Object> modHeaders = new HashMap<>();
+			iffPut(modHeaders, "msrvLoggable", Boolean.TRUE);
+			iffPut(modHeaders, "msrvPublishedBy", this.getServiceName());
+			iffPut(modHeaders, "error", "error"); //Does this work to ensure this message is typed as an error?
+			iffPut(modHeaders, "errorType", sourceException.getClass().getName());
+			iffPut(modHeaders, "requestId", requestId);
+			iffPut(modHeaders, "serviceRequestId", serviceRequestId);
+			log.error("Sending error message with Headers {} and body: {}", new Gson().toJson(modHeaders, Map.class), errorMessage);
+			AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
+				.headers(modHeaders)
+				.build();
+			channel.basicPublish(exchange, "", props, errorMessage.getBytes());
+		} catch (Exception e) {
+			log.error("Could not send error for requestId {} and serviceRequestId", requestId, serviceRequestId);
+		} finally {
+			try {
+				if (null != channel) {
+					channel.close();
+				}
+			} catch (Exception e) {
+				log.error("Could not close error sending channel");
+			}
+		}
 	}
 }
