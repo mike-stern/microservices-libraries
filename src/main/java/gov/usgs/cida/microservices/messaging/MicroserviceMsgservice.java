@@ -3,7 +3,9 @@ package gov.usgs.cida.microservices.messaging;
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 
+import gov.usgs.cida.microservices.api.messaging.MessagingClient;
 import gov.usgs.cida.microservices.api.messaging.MicroserviceHandler;
+import gov.usgs.cida.microservices.util.MessageUtils;
 
 import com.rabbitmq.client.AMQP.Queue.DeclareOk;
 
@@ -37,7 +39,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author thongsav
  */
-public final class MicroserviceMsgservice implements Closeable {
+public final class MicroserviceMsgservice implements Closeable, MessagingClient {
 
 	private static final Logger log = LoggerFactory.getLogger(MicroserviceMsgservice.class);
 
@@ -177,7 +179,7 @@ public final class MicroserviceMsgservice implements Closeable {
 						//new instances just in case someone makes a non-threadsafe handler
 						MicroserviceHandler handler = clazz.newInstance();
 						Channel channel = getChannel();
-						Consumer consumer = new MicroserviceConsumer(channel, handler);
+						Consumer consumer = new MicroserviceConsumer(channel, handler, this);
 						channel.basicConsume(queueName, true, consumer);
 						log.info("Channel {} now listening for {} messages, handled by {}", channel.getChannelNumber(), queueName, clazz.getSimpleName());
 					}
@@ -206,7 +208,8 @@ public final class MicroserviceMsgservice implements Closeable {
 		return this.serviceName;
 	}
 	
-	public void sendMessage(Map<String, Object> headers, byte[] message) {
+	@Override
+	public void sendMessage(String requestId, String serviceRequestId, Map<String, Object> headers, byte[] message) {
 		Channel channel = null;
 		try {
 			channel = getChannel();
@@ -215,9 +218,11 @@ public final class MicroserviceMsgservice implements Closeable {
 			if (null != headers) {
 				modHeaders.putAll(headers);
 			}
+			iffPut(modHeaders, "requestId", requestId);
+			iffPut(modHeaders, "serviceRequestId", serviceRequestId);
 			iffPut(modHeaders, "msrvLoggable", Boolean.TRUE);
 			iffPut(modHeaders, "msrvPublishedBy", this.getServiceName());
-			log.trace("Sending message with Headers {}", message, new Gson().toJson(modHeaders, Map.class));
+			log.trace("Sending message with Headers {}", new Gson().toJson(modHeaders, Map.class));
 			AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
 				.headers(modHeaders)
 				.build();

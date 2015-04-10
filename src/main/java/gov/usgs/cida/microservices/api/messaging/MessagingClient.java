@@ -6,10 +6,10 @@ public interface MessagingClient {
 	
 	/**
 	 * 
-	 * 
-	 * @param topic
 	 * @param requestId
+	 * @param serviceRequestId
+	 * @param headers
 	 * @param message
 	 */
-	public void sendMessage(String topic, String requestId, Map<String, String> message);
+	public void sendMessage(String requestId, String serviceRequestId, Map<String, Object> headers, byte[] message);
 }
