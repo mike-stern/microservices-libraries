@@ -67,7 +67,8 @@ public class MicroserviceConsumer extends DefaultConsumer  {
 		HashMap<String, Object> errorParams = new HashMap<>();
 		errorParams.put("eventType", "error");
 		errorParams.put("errorType", sourceException.getClass().getName());
-		msgService.sendMessage(requestId, serviceRequestId, errorParams, sourceException.getMessage().getBytes());
+		msgService.sendMessage(requestId, serviceRequestId, errorParams, (sourceException == null || sourceException.getMessage() == null 
+				? "no source exception/message" : sourceException.getMessage()).getBytes());
 	}
 
 	private String getStringFromHeaders(Map<String, Object> params, String key) {
